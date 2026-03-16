@@ -24,9 +24,9 @@ Optional outputs:
 ## Output Constraints (User-Defined)
 
 - In HTML output, do not use the em dash character (`—`). It is only allowed when directly quoting source text that contains an em dash; keep it inside a quote and tie it to a source location in the evidence ledger. Use commas, colons, or secondary sentences for transitions.
-- The visual digest word count (visible text only, excluding HTML tags, scripts, and styles) must be at least 1/4 of the source paper word count. This is a hard floor to ensure pedagogical depth.
+- The visual digest word count (visible text only, excluding HTML tags, scripts, and styles) must be at least 1/2 of the source paper word count. This is a dynamic hard floor scaled to the specific paper being processed to ensure pedagogical depth. Failure to meet this relative floor renders the output invalid.
 - Do not pad with low-quality filler. Add interpretation that explains implications, connections, or reasoning beyond surface paraphrase, while staying grounded in the source. Use the `interpretation-box` or `analysis-box` components.
-- Style Preference: Default to the "Premium Academic" template (`references/templates/premium_academic.html`). This features a white/neutral minimalist aesthetic, `Crimson Pro` serif body text, and sidebar navigation. Avoid "loud" neon or high-contrast dark themes unless explicitly requested.
+- Style Preference: **Always** use the "Premium Academic" template (`references/templates/premium_academic.html`) as the default and mandatory choice. This features a white/neutral minimalist aesthetic, `Crimson Pro` serif body text, and sidebar navigation. Do not use other templates unless explicitly requested.
 - **Anti-Overflow Mechanism**: All mathematical formulas and tables MUST be wrapped in containers with `overflow-x: auto` and `-webkit-overflow-scrolling: touch`. This ensures that long equations do not break the layout on narrow screens or within fixed-width cards.
 - Avoid self-referential or promotional boilerplate in HTML. Do not claim the digest is definitive, exhaustive, or that it satisfies word count requirements.
 
