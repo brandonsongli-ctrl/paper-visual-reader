@@ -1,0 +1,1 @@
+Equation (1) in Section 4 (p.10): y_i = alpha + beta x_i + epsilon_i.

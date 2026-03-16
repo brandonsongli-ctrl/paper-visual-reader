@@ -1,0 +1,18 @@
+{
+  "version": "EvidenceLedgerV1",
+  "mode": "A",
+  "source": "source.txt",
+  "claims": [
+    {
+      "claim_id": "E1",
+      "claim_class": "Equation",
+      "claim_text": "theta_t = lambda_0 + lambda_1 q_t^5 + u_t",
+      "anchor": "Eq. (1), p.10",
+      "source_location": "Main Paper §4",
+      "severity": "BLOCKING",
+      "confidence": 0.93,
+      "status": "VERIFIED",
+      "notes": "Intentional mismatch"
+    }
+  ]
+}

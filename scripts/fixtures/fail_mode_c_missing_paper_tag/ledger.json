@@ -1,0 +1,20 @@
+{
+  "version": "EvidenceLedgerV1",
+  "mode": "C",
+  "source": "source.txt",
+  "claims": [
+    {
+      "claim_id": "A_R1",
+      "claim_class": "Result",
+      "claim_text": "Ownership tag is missing.",
+      "anchor": "Section 2, p.4",
+      "source_location": "Section 2 only",
+      "severity": "BLOCKING",
+      "confidence": 0.75,
+      "status": "VERIFIED",
+      "notes": "missing tag",
+      "paper_id": "A",
+      "mode_tag": "C"
+    }
+  ]
+}

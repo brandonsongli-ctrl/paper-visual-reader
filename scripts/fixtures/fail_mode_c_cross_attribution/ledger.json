@@ -1,0 +1,20 @@
+{
+  "version": "EvidenceLedgerV1",
+  "mode": "C",
+  "source": "source.txt",
+  "claims": [
+    {
+      "claim_id": "A_R1",
+      "claim_class": "Result",
+      "claim_text": "Mixed ownership statement.",
+      "anchor": "Section 2, p.4",
+      "source_location": "Paper A: Section 2; Paper B: Section 3",
+      "severity": "BLOCKING",
+      "confidence": 0.8,
+      "status": "VERIFIED",
+      "notes": "cross attribution fail",
+      "paper_id": "A",
+      "mode_tag": "C"
+    }
+  ]
+}

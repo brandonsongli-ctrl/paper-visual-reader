@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PAPER_TITLE}} · Theory Visual Digest</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$'+'$',right:'$'+'$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg: #0f172a;
+      --surface: rgba(30, 41, 59, 0.7);
+      --bg-elevated: rgba(30, 41, 59, 0.9);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --accent-1: #38bdf8;
+      --accent-2: #818cf8;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .hero {
+      padding: 32px;
+      border-radius: var(--radius);
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: 36px;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      margin: 6px 0;
+      color: var(--text-dim);
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .section-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-1);
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .narrative-transition {
+      padding: 16px;
+      margin: 16px 0;
+      color: var(--text-dim);
+      border-left: 2px dashed rgba(255, 255, 255, 0.2);
+      font-style: italic;
+    }
+
+    .card h3 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .analysis-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 10px;
+      border-left: 4px solid;
+      background: rgba(0, 0, 0, 0.3);
+      font-size: 0.95rem;
+    }
+
+    .analysis-box h4 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .intuition {
+      border-color: #fce762;
+    }
+
+    .intuition h4 {
+      color: #fce762;
+    }
+
+    .proof-logic {
+      border-color: #ff9f1c;
+    }
+
+    .proof-logic h4 {
+      color: #ff9f1c;
+    }
+
+    .formal-math {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: "Georgia", serif;
+      font-size: 1.05rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .notation {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .notation h4 {
+      color: #38bdf8;
+    }
+
+    ul {
+      margin: 8px 0;
+      padding-left: 20px;
+      color: #e2e8f0;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .anchor {
+      font-size: 12px;
+      color: var(--accent-2);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 16px;
+    }
+
+    .meta {
+      display: none;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .mini {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .mini strong {
+      color: var(--accent-2);
+      font-size: 0.95rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+    }
+
+    td,
+    th {
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      padding: 6px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="hero" id="architecture">
+      <h1>{{PAPER_TITLE}}</h1>
+      <p><strong>{{AUTHORS}}</strong> · {{VENUE_YEAR}} · {{DOI_OR_URL}}</p>
+      <div class="narrative-transition">{{ONE_SENTENCE_TAKEAWAY}}</div>
+    </section>
+
+    <!-- 1. Motivation & Problem Statement -->
+    <section class="section" id="context">
+      <div class="section-header">
+        <div class="section-icon">🌍</div>
+        <h2 class="section-title">Motivation & Problem Statement</h2>
+      </div>
+      <!-- AI INSTRUCTION: Explain the fundamental real-world or theoretical gap this paper aims to solve. -->
+      <article class="card claim-card sev-STYLE" data-claim-id="MOTIVATION-1" data-claim-class="Result"
+        data-anchor="Motivation" data-severity="STYLE" data-source-location="Main Paper §1">
+        <div class="analysis-box intuition">
+          <h4>🔥 The Fundamental Question</h4>
+          <p>{{MOTIVATION_TEXT}}</p>
+        </div>
+        <div class="anchor">Motivation</div>
+      </article>
+    </section>
+
+    <!-- 2. Main Contributions -->
+    <section class="section" id="contributions">
+      <div class="section-header">
+        <div class="section-icon">💎</div>
+        <h2 class="section-title">Main Contributions & Key Results</h2>
+      </div>
+      <!-- AI INSTRUCTION: Synthesize the paper's 3-4 most important contributions into bullet points. -->
+      <article class="card claim-card sev-BLOCKING" data-claim-id="CONTRIB-1" data-claim-class="Result"
+        data-anchor="Contributions" data-severity="BLOCKING" data-source-location="Main Paper §1">
+        <div class="analysis-box proof-logic">
+          <h4>✨ Core Achievements</h4>
+          <ul>
+            <!-- Loop over key contributions -->
+            <li>{{CONTRIBUTION_1}}</li>
+            <li>{{CONTRIBUTION_2}}</li>
+          </ul>
+        </div>
+        <div class="anchor">Contributions</div>
+      </article>
+    </section>
+
+    <!-- 3. Literature -->
+    <section class="section" id="literature">
+      <div class="section-header">
+        <div class="section-icon">📚</div>
+        <h2 class="section-title">Relationship to Literature & Citation Network</h2>
+      </div>
+      <!-- AI INSTRUCTION: Map out the 3-5 foundational papers this builds upon or contradicts. Create a citation network map. -->
+      <article class="card claim-card sev-STYLE" data-claim-id="LITREV-1" data-claim-class="Result"
+        data-anchor="Literature" data-severity="STYLE" data-source-location="Main Paper §1">
+        <p>{{LITERATURE_SYNTHESIS}}</p>
+        <div class="mini-grid">
+          <!-- AI INSTRUCTION: Duplicate this mini block for each key foundational paper discussed -->
+          <div class="mini"><strong>Key Foundation Paper 1</strong><br>How this paper builds on it.</div>
+          <div class="mini"><strong>Key Foundational Paper 2</strong><br>How this paper contradicts/differs from it.
+          </div>
+        </div>
+        <div class="anchor">Literature</div>
+      </article>
+    </section>
+
+    <!-- Formal Setup -->
+    <section class="section" id="setup">
+      <div class="section-header">
+        <div class="section-icon">⚙️</div>
+        <h2 class="section-title">Formal Setup</h2>
+      </div>
+      <div class="narrative-transition">Before formalizing the proofs, we first characterize the building blocks of the
+        model structure.</div>
+      <article class="card claim-card sev-BLOCKING" data-claim-id="SETUP-1" data-claim-class="Result"
+        data-anchor="{{ANCHOR_SETUP}}" data-severity="BLOCKING" data-source-location="{{SOURCE_LOC_SETUP}}">
+        <h3>Shared Environment</h3>
+        <p>{{SETUP_DESCRIPTION}}</p>
+        <div class="mini-grid">
+          <div class="mini"><strong>State Space</strong><br>$$ {{STATE_SPACE_LATEX}} $$</div>
+          <div class="mini"><strong>Prior</strong><br>$$ {{PRIOR_LATEX}} $$</div>
+        </div>
+        <div class="anchor">{{ANCHOR_SETUP}}</div>
+      </article>
+    </section>
+
+    <!-- Lemmas Layer -->
+    <section class="section" id="lemmas">
+      <div class="section-header">
+        <div class="section-icon">🧩</div>
+        <h2 class="section-title">Lemma Layer</h2>
+      </div>
+      <!-- AI INSTRUCTION: Duplicate this article block for EVERY Lemma -->
+      <article class="card claim-card sev-MAJOR" data-claim-id="LEMMA-1" data-claim-class="Mechanism"
+        data-anchor="{{ANCHOR_LEMMA}}" data-severity="MAJOR" data-source-location="{{SOURCE_LOC_LEMMA}}">
+        <h3>Lemma {{LEMMA_NUMBER}}: {{LEMMA_DESCRIPTION}}</h3>
+        <div class="formal-math">$$ {{LEMMA_LATEX}} $$</div>
+        <div class="analysis-box intuition">
+          <h4>💡 Economic / Mathematical Intuition</h4>
+          <p>{{LEMMA_INTUITION}}</p>
+        </div>
+        <div class="analysis-box notation">
+          <h4>📖 Notation Glossary</h4>
+          <ul>
+            <!-- AI INSTRUCTION: Define EVERY mathematical symbol used in the formula above -->
+            <li>$x$: Explanatory definition of x</li>
+          </ul>
+        </div>
+        <div class="analysis-box proof-logic">
+          <h4>⛓️ Proof Logic</h4>
+          <p>{{LEMMA_PROOF_SKETCH}}</p>
+        </div>
+        <div class="anchor">{{ANCHOR_LEMMA}}</div>
+      </article>
+    </section>
+
+    <!-- Theorems Layer -->
+    <section class="section" id="theorems">
+      <div class="section-header">
+        <div class="section-icon">⚖️</div>
+        <h2 class="section-title">Main Results</h2>
+      </div>
+      <!-- AI INSTRUCTION: Duplicate this article block for EVERY Theorem or Proposition -->
+      <article class="card claim-card sev-BLOCKING" data-claim-id="THM-1" data-claim-class="Equation"
+        data-anchor="{{ANCHOR_THM}}" data-severity="BLOCKING" data-source-location="{{SOURCE_LOC_THM}}">
+        <h3>Theorem {{THEOREM_NUMBER}}: {{THEOREM_DESCRIPTION}}</h3>
+        <div class="formal-math">$$ {{THEOREM_LATEX}} $$</div>
+        <div class="analysis-box intuition">
+          <h4>💡 Economic / Mathematical Intuition</h4>
+          <p>{{THEOREM_INTUITION}}</p>
+        </div>
+        <div class="analysis-box notation">
+          <h4>📖 Notation Glossary</h4>
+          <ul>
+            <!-- AI INSTRUCTION: Define EVERY mathematical symbol used in the formula above -->
+            <li>$y$: Explanatory definition of y</li>
+          </ul>
+        </div>
+        <div class="analysis-box proof-logic">
+          <h4>⛓️ Proof Logic</h4>
+          <p>{{THEOREM_PROOF_SKETCH}}</p>
+        </div>
+        <div class="anchor">{{ANCHOR_THM}}</div>
+      </article>
+    </section>
+
+    <!-- Numerical Examples -->
+    <section class="section" id="examples">
+      <div class="section-header">
+        <div class="section-icon">📊</div>
+        <h2 class="section-title">Numerical Examples</h2>
+      </div>
+      <!-- AI INSTRUCTION: Duplicate this article for EVERY Numerical Example or Edge Case -->
+      <article class="card claim-card sev-MAJOR" data-claim-id="NUM-1" data-claim-class="Numeric"
+        data-anchor="{{ANCHOR_NUM}}" data-severity="MAJOR" data-source-location="{{SOURCE_LOC_NUM}}">
+        <h3>Example / Proposition: {{NUMERICAL_DESCRIPTION}}</h3>
+        <div class="formal-math">$$ {{NUMERICAL_LATEX}} $$</div>
+        <div class="analysis-box intuition">
+          <h4>🎯 Practical Implications / Edge Case</h4>
+          <p>{{NUMERICAL_IMPLICATION}}</p>
+        </div>
+        <div class="anchor">{{ANCHOR_NUM}}</div>
+      </article>
+      <div class="narrative-transition">The paper relies on topological limits where explicit numerical functional forms
+        are omitted.</div>
+    </section>
+
+    <!-- Conclusion -->
+    <section class="section" id="conclusion">
+      <div class="section-header">
+        <div class="section-icon">🏁</div>
+        <h2 class="section-title">Conclusion & Broader Impact</h2>
+      </div>
+      <!-- AI INSTRUCTION: Provide a wrap-up narrative abstracting away from the math. -->
+      <article class="card claim-card sev-STYLE" data-claim-id="CONCLUSION-1" data-claim-class="Result"
+        data-anchor="Conclusion" data-severity="STYLE" data-source-location="Main Paper">
+        <div class="analysis-box intuition">
+          <h4>🏁 Core Takeaway</h4>
+          <p>{{CONCLUSION_TEXT}}</p>
+        </div>
+        <div class="anchor">Conclusion</div>
+      </article>
+    </section>
+
+    <!-- Ledger -->
+    <section class="section" id="ledger">
+      <div class="section-header">
+        <div class="section-icon">🧾</div>
+        <h2 class="section-title">Evidence Ledger</h2>
+      </div>
+
+      <article class="card claim-card sev-MAJOR" data-claim-id="META-1" data-claim-class="Metadata"
+        data-anchor="{{ANCHOR_META}}" data-severity="MAJOR" data-source-location="{{SOURCE_LOC_META}}">
+        <table>
+          <tbody>
+            <tr>
+              <td style="width: 150px; color: var(--text-dim);"><strong>Ledger File</strong></td>
+              <td><code>visual_digest_{{PAPER_SHORT}}.evidence_ledger.json</code></td>
+            </tr>
+            <tr>
+              <td style="color: var(--text-dim);"><strong>Gate Status</strong></td>
+              <td><strong style="color: var(--accent-1);">{{GATE_STATUS}}</strong> (strict={{STRICT_MODE}})</td>
+            </tr>
+            <tr>
+              <td style="color: var(--text-dim);"><strong>Language</strong></td>
+              <td>{{LANGUAGE_MODE}}</td>
+            </tr>
+            <tr>
+              <td style="color: var(--text-dim);"><strong>Reading Map</strong></td>
+              <td>{{READING_MAP}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="anchor">{{ANCHOR_META}}</div>
+      </article>
+    </section>
+  </main>
+</body>
+
+</html>

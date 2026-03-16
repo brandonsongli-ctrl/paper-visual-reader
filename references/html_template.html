@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Digest Template</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+    :root {
+      --bg: #0f0f13;
+      --bg-card: #1a1a24;
+      --bg-elevated: #22223a;
+      --border: #2a2a40;
+      --text: #e8e6f0;
+      --text-dim: #9b97b0;
+      --text-bright: #fff;
+      --accent: #7c6cf0;
+      --accent-light: #a78bfa;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --red: #f87171;
+      --blue: #60a5fa;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Serif SC', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .hero {
+      position: relative;
+      padding: 72px 40px 56px;
+      background: linear-gradient(135deg, #1a1033 0%, #0f0f13 45%, #0a1628 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-inner,
+    .content,
+    .nav-inner {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .paper-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-light);
+      margin-bottom: 20px;
+      background: rgba(124, 108, 240, 0.15);
+    }
+
+    .paper-title {
+      font-size: 40px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      color: var(--text-bright);
+    }
+
+    .paper-meta {
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    .takeaway {
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      background: rgba(124, 108, 240, 0.12);
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    .keywords {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .keyword {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 10px;
+      color: var(--text-dim);
+      background: var(--bg-elevated);
+    }
+
+    .nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 15, 19, 0.84);
+      backdrop-filter: blur(20px) saturate(1.5);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+    }
+
+    .nav-inner {
+      display: flex;
+      overflow-x: auto;
+      gap: 0;
+    }
+
+    .nav-item {
+      text-decoration: none;
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      padding: 14px 16px;
+      border-bottom: 2px solid transparent;
+    }
+
+    .nav-item.active,
+    .nav-item:hover {
+      color: var(--accent-light);
+      border-bottom-color: var(--accent);
+    }
+
+    .content {
+      padding: 36px 40px 48px;
+    }
+
+    .section {
+      margin-bottom: 44px;
+      scroll-margin-top: 70px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .section-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: var(--text-bright);
+    }
+
+    .anchor {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-light);
+      background: rgba(124, 108, 240, 0.12);
+      border: 1px solid rgba(124, 108, 240, 0.4);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+
+    .claim-meta {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: var(--bg-elevated);
+    }
+
+    .equation-block {
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      background: rgba(96, 165, 250, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .equation-label {
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text-bright);
+      font-weight: 600;
+      background: rgba(34, 34, 58, 0.6);
+    }
+
+    .gate-box {
+      border-left: 4px solid var(--blue);
+      background: rgba(96, 165, 250, 0.12);
+      padding: 14px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .unreadable {
+      border: 1px solid rgba(248, 113, 113, 0.55);
+      background: rgba(248, 113, 113, 0.12);
+      color: #ffd4d4;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      padding: 32px 12px;
+    }
+
+    @media (max-width: 800px) {
+      .hero,
+      .content,
+      .nav-bar {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .paper-title {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="paper-badge">📄 VISUAL DIGEST TEMPLATE</div>
+      <h1 class="paper-title">{{PAPER_TITLE}}</h1>
+      <div class="paper-meta">
+        <strong>{{AUTHORS}}</strong> · {{VENUE_YEAR}} · {{DOI_OR_URL}}
+      </div>
+      <div class="takeaway">🎯 {{ONE_SENTENCE_TAKEAWAY}}</div>
+      <div class="keywords">
+        <span class="keyword">{{KEYWORD_1}}</span>
+        <span class="keyword">{{KEYWORD_2}}</span>
+        <span class="keyword">{{KEYWORD_3}}</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <a class="nav-item" href="#architecture">Architecture</a>
+      <a class="nav-item" href="#method">Method</a>
+      <a class="nav-item" href="#equations">Equations</a>
+      <a class="nav-item" href="#results">Results</a>
+      <a class="nav-item" href="#critical">Assessment</a>
+      <a class="nav-item" href="#template-routing">Template Routing</a>
+      <a class="nav-item" href="#ledger">Evidence Ledger</a>
+      <a class="nav-item" href="#gate">Gate Status</a>
+      <a class="nav-item" href="#reading-map">Reading Map</a>
+    </div>
+  </nav>
+
+  <main class="content">
+    <section class="section" id="architecture">
+      <div class="section-header">
+        <div class="section-icon">🏗️</div>
+        <h2 class="section-title">Paper Architecture</h2>
+      </div>
+      <div class="card" data-claim-id="META-1" data-claim-class="Metadata" data-anchor="Section map, p.1-2"
+        data-severity="MAJOR" data-source-location="Main Paper §1">
+        <h3>Section Map</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Role</th>
+              <th>Key Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{SEC_1}}</td>
+              <td>{{SEC_1_ROLE}}</td>
+              <td>{{SEC_1_OUTPUT}}</td>
+            </tr>
+            <tr>
+              <td>{{SEC_2}}</td>
+              <td>{{SEC_2_ROLE}}</td>
+              <td>{{SEC_2_OUTPUT}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <span class="anchor">{{ANCHOR_ARCH}}</span>
+        <div class="claim-meta">
+          <span class="pill">claim_id=META-1</span>
+          <span class="pill">class=Metadata</span>
+          <span class="pill">severity=MAJOR</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="section-header">
+        <div class="section-icon">🧪</div>
+        <h2 class="section-title">Data and Identification</h2>
+      </div>
+      <div class="card claim-card" data-claim-id="R1" data-claim-class="Result" data-anchor="Table 1, p.8"
+        data-severity="BLOCKING" data-source-location="Main Paper §3.1">
+        <h3>{{RESULT_TITLE}}</h3>
+        <p>{{RESULT_DETAIL}}</p>
+        <span class="anchor">{{ANCHOR_R1}}</span>
+        <div class="claim-meta">
+          <span class="pill">claim_id=R1</span>
+          <span class="pill">class=Result</span>
+          <span class="pill">severity=BLOCKING</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="equations">
+      <div class="section-header">
+        <div class="section-icon">🧮</div>
+        <h2 class="section-title">Key Equations</h2>
+      </div>
+      <div class="card claim-card" data-claim-id="E1" data-claim-class="Equation" data-anchor="Eq. (1), p.10"
+        data-severity="BLOCKING" data-source-location="Main Paper §4.1">
+        <h3>{{EQUATION_NAME}}</h3>
+        <div class="equation-block">
+          <div class="equation-label">Eq. (1) · {{EQ_LOCATION}}</div>
+          $$ {{EQUATION_LATEX}} $$
+        </div>
+        <p>{{EQUATION_EXPLANATION}}</p>
+        <span class="anchor">{{ANCHOR_E1}}</span>
+        <div class="claim-meta">
+          <span class="pill">claim_id=E1</span>
+          <span class="pill">class=Equation</span>
+          <span class="pill">severity=BLOCKING</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="results">
+      <div class="section-header">
+        <div class="section-icon">📊</div>
+        <h2 class="section-title">Main Results</h2>
+      </div>
+      <div class="card claim-card" data-claim-id="N1" data-claim-class="Numeric" data-anchor="Table 2, p.12"
+        data-severity="BLOCKING" data-source-location="Main Paper §5.2">
+        <h3>{{NUMERIC_RESULT_TITLE}}</h3>
+        <p>{{NUMERIC_RESULT_TEXT}}</p>
+        <span class="anchor">{{ANCHOR_N1}}</span>
+        <div class="claim-meta">
+          <span class="pill">claim_id=N1</span>
+          <span class="pill">class=Numeric</span>
+          <span class="pill">severity=BLOCKING</span>
+        </div>
+      </div>
+
+      <div class="card claim-card" data-claim-id="C1" data-claim-class="Causal" data-anchor="Section 5.3, p.13"
+        data-severity="MAJOR" data-source-location="Main Paper §5.3">
+        <h3>{{CAUSAL_RESULT_TITLE}}</h3>
+        <p>{{CAUSAL_RESULT_TEXT}}</p>
+        <span class="anchor">{{ANCHOR_C1}}</span>
+        <div class="claim-meta">
+          <span class="pill">claim_id=C1</span>
+          <span class="pill">class=Causal</span>
+          <span class="pill">severity=MAJOR</span>
+        </div>
+      </div>
+
+      <div class="card claim-card" data-claim-id="S1" data-claim-class="Speculation"
+        data-anchor="Discussion, p.20" data-severity="MINOR" data-source-location="Main Paper §7">
+        <h3>{{SPECULATION_TITLE}}</h3>
+        <p>{{SPECULATION_TEXT}}</p>
+        <span class="anchor">{{ANCHOR_S1}}</span>
+        <div class="claim-meta">
+          <span class="pill">claim_id=S1</span>
+          <span class="pill">class=Speculation</span>
+          <span class="pill">severity=MINOR</span>
+        </div>
+      </div>
+
+      <div class="unreadable">[UNREADABLE] {{UNREADABLE_NOTE}}</div>
+    </section>
+
+    <section class="section" id="critical">
+      <div class="section-header">
+        <div class="section-icon">🔍</div>
+        <h2 class="section-title">Critical Assessment</h2>
+      </div>
+      <div class="card">
+        <h3>Strengths</h3>
+        <p>{{STRENGTHS}}</p>
+      </div>
+      <div class="card">
+        <h3>Limitations</h3>
+        <p>{{LIMITATIONS}}</p>
+      </div>
+    </section>
+
+    <section class="section" id="template-routing">
+      <div class="section-header">
+        <div class="section-icon">🧭</div>
+        <h2 class="section-title">Template Family Routing</h2>
+      </div>
+      <div class="card">
+        <p>This compatibility template remains valid and backward compatible.</p>
+        <p>For richer output families in v2.5, prefer:</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Family</th>
+              <th>Path</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>theory</code></td>
+              <td><code>references/templates/theory.html</code></td>
+              <td>Model primitives, assumptions, propositions, proof logic.</td>
+            </tr>
+            <tr>
+              <td><code>empirical</code></td>
+              <td><code>references/templates/empirical.html</code></td>
+              <td>Data, identification, coefficients, robustness and interpretation.</td>
+            </tr>
+            <tr>
+              <td><code>comparative</code></td>
+              <td><code>references/templates/comparative.html</code></td>
+              <td>Mode C cross-paper attribution and side-by-side synthesis.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="ledger">
+      <div class="section-header">
+        <div class="section-icon">🧾</div>
+        <h2 class="section-title">Evidence Ledger</h2>
+      </div>
+      <div class="card">
+        <p>Attach ledger file: <code>visual_digest_{{PAPER_SHORT}}.evidence_ledger.json</code></p>
+        <table>
+          <thead>
+            <tr>
+              <th>claim_id</th>
+              <th>claim_class</th>
+              <th>anchor</th>
+              <th>severity</th>
+              <th>status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>R1</td>
+              <td>Result</td>
+              <td>{{ANCHOR_R1}}</td>
+              <td>BLOCKING</td>
+              <td>VERIFIED</td>
+            </tr>
+            <tr>
+              <td>E1</td>
+              <td>Equation</td>
+              <td>{{ANCHOR_E1}}</td>
+              <td>BLOCKING</td>
+              <td>VERIFIED</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="gate">
+      <div class="section-header">
+        <div class="section-icon">🛡️</div>
+        <h2 class="section-title">Gate Status</h2>
+      </div>
+      <div class="card gate-box">
+        <p><strong>Final Gate:</strong> {{GATE_STATUS}}</p>
+        <p><strong>Strict Mode:</strong> {{STRICT_MODE}}</p>
+        <p><strong>Report:</strong> <code>visual_digest_{{PAPER_SHORT}}.anti_hallucination_report.md</code></p>
+        <p><strong>Blocked Report (if needed):</strong> <code>visual_digest_{{PAPER_SHORT}}.blocked.md</code></p>
+      </div>
+    </section>
+
+    <section class="section" id="reading-map">
+      <div class="section-header">
+        <div class="section-icon">📋</div>
+        <h2 class="section-title">Reading Map</h2>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Path</th>
+              <th>Time</th>
+              <th>Sections</th>
+              <th>Goal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>⚡ Speed</td>
+              <td>{{TIME_SPEED}}</td>
+              <td>{{PATH_SPEED}}</td>
+              <td>{{GOAL_SPEED}}</td>
+            </tr>
+            <tr>
+              <td>📖 Standard</td>
+              <td>{{TIME_STANDARD}}</td>
+              <td>{{PATH_STANDARD}}</td>
+              <td>{{GOAL_STANDARD}}</td>
+            </tr>
+            <tr>
+              <td>🔬 Deep</td>
+              <td>{{TIME_DEEP}}</td>
+              <td>{{PATH_DEEP}}</td>
+              <td>{{GOAL_DEEP}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Generated by <strong>paper-visual-reader v2</strong> · Evidence-anchored output · KaTeX rendering enabled.
+  </footer>
+
+  <script>
+    const sections = document.querySelectorAll('.section');
+    const navItems = document.querySelectorAll('.nav-item');
+
+    function setActive() {
+      let current = '';
+      sections.forEach((section) => {
+        if (window.scrollY >= section.offsetTop - 120) {
+          current = section.id;
+        }
+      });
+      navItems.forEach((item) => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + current) {
+          item.classList.add('active');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', setActive);
+    setActive();
+  </script>
+</body>
+
+</html>

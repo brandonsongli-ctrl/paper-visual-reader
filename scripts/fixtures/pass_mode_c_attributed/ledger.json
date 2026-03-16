@@ -1,0 +1,46 @@
+{
+  "version": "EvidenceLedgerV1",
+  "mode": "C",
+  "template_family": "comparative",
+  "source": "source.txt",
+  "claims": [
+    {
+      "claim_id": "A_R1",
+      "claim_class": "Result",
+      "claim_text": "Paper A finds persistent institutions.",
+      "anchor": "Section 2, p.4",
+      "source_location": "Paper A: Section 2",
+      "severity": "BLOCKING",
+      "confidence": 0.91,
+      "status": "VERIFIED",
+      "notes": "Mode C pass A",
+      "paper_id": "A",
+      "mode_tag": "C"
+    },
+    {
+      "claim_id": "B_R1",
+      "claim_class": "Result",
+      "claim_text": "Paper B finds adaptive responses.",
+      "anchor": "Section 3, p.5",
+      "source_location": "Paper B: Section 3",
+      "severity": "BLOCKING",
+      "confidence": 0.9,
+      "status": "VERIFIED",
+      "notes": "Mode C pass B",
+      "paper_id": "B",
+      "mode_tag": "C"
+    },
+    {
+      "claim_id": "META-1",
+      "claim_class": "Metadata",
+      "claim_text": "Comparative framing metadata.",
+      "anchor": "Appendix, p.1",
+      "source_location": "Comparative metadata",
+      "severity": "MAJOR",
+      "confidence": 0.8,
+      "status": "VERIFIED",
+      "notes": "metadata",
+      "mode_tag": "C"
+    }
+  ]
+}

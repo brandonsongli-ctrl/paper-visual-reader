@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PAPER_TITLE}} · Comparative Visual Digest</title>
+  <style>
+    :root {
+      --bg: #11131f;
+      --surface: #1a1f33;
+      --surface-2: #202842;
+      --border: #3d4d7a;
+      --text: #edf2ff;
+      --muted: #afbadb;
+      --accent-a: #4ec3ff;
+      --accent-b: #7be495;
+      --warn: #ffc857;
+      --risk: #ff7b7b;
+      --radius: 14px;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 10%, #23284b 0, #11131f 58%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 24px 18px 46px;
+    }
+
+    .hero {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(130deg, #1e2344, #15182c 68%);
+      padding: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 1.9rem;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .toolbar {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: #151b32;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .btn.active {
+      color: var(--text);
+      border-color: var(--accent-a);
+      background: rgba(78, 195, 255, 0.16);
+    }
+
+    .results-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 14px;
+      position: relative;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .claim-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      border-radius: 14px 0 0 14px;
+      background: var(--accent-a);
+    }
+
+    .paper-b::before {
+      background: var(--accent-b);
+    }
+
+    .sev-MAJOR::before {
+      background: var(--warn);
+    }
+
+    .anchor {
+      color: #9cc7ff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+    }
+
+    .meta {
+      margin-top: 8px;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: var(--surface-2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 0.86rem;
+    }
+
+    td, th {
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      padding: 7px;
+    }
+
+    .panel {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      padding: 14px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+      .results-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="hero" id="architecture">
+      <h1>{{PAPER_TITLE}}</h1>
+      <p>{{ONE_SENTENCE_TAKEAWAY}}</p>
+      <div class="toolbar" id="cmpFilter">
+        <button class="btn active" data-filter="all">all</button>
+        <button class="btn" data-filter="a">paper A only</button>
+        <button class="btn" data-filter="b">paper B only</button>
+      </div>
+    </section>
+
+    <section class="results-grid" id="results">
+      <article class="card claim-card" data-paper="a" data-claim-id="A_R1" data-claim-class="Result" data-anchor="{{ANCHOR_A_R1}}"
+        data-severity="BLOCKING" data-source-location="{{SOURCE_LOC_A_R1}}">
+        <h2>{{SOURCE_A_NAME}} Core Result</h2>
+        <p>{{RESULT_A}}</p>
+        <div class="anchor">{{ANCHOR_A_R1}}</div>
+        <div class="meta"><span class="pill">claim_id=A_R1</span><span class="pill">loc={{SOURCE_LOC_A_R1}}</span></div>
+      </article>
+
+      <article class="card claim-card paper-b" data-paper="b" data-claim-id="B_R1" data-claim-class="Result" data-anchor="{{ANCHOR_B_R1}}"
+        data-severity="BLOCKING" data-source-location="{{SOURCE_LOC_B_R1}}">
+        <h2>{{SOURCE_B_NAME}} Core Result</h2>
+        <p>{{RESULT_B}}</p>
+        <div class="anchor">{{ANCHOR_B_R1}}</div>
+        <div class="meta"><span class="pill">claim_id=B_R1</span><span class="pill">loc={{SOURCE_LOC_B_R1}}</span></div>
+      </article>
+
+      <article class="card claim-card sev-MAJOR" data-paper="a" data-claim-id="A_C1" data-claim-class="Causal" data-anchor="{{ANCHOR_A_C1}}"
+        data-severity="MAJOR" data-source-location="{{SOURCE_LOC_A_C1}}">
+        <h2>{{SOURCE_A_NAME}} Causal Boundary</h2>
+        <p>{{CAUSAL_A}}</p>
+        <div class="anchor">{{ANCHOR_A_C1}}</div>
+        <div class="meta"><span class="pill">claim_id=A_C1</span><span class="pill">loc={{SOURCE_LOC_A_C1}}</span></div>
+      </article>
+
+      <article class="card claim-card paper-b sev-MAJOR" data-paper="b" data-claim-id="B_C1" data-claim-class="Causal" data-anchor="{{ANCHOR_B_C1}}"
+        data-severity="MAJOR" data-source-location="{{SOURCE_LOC_B_C1}}">
+        <h2>{{SOURCE_B_NAME}} Causal Boundary</h2>
+        <p>{{CAUSAL_B}}</p>
+        <div class="anchor">{{ANCHOR_B_C1}}</div>
+        <div class="meta"><span class="pill">claim_id=B_C1</span><span class="pill">loc={{SOURCE_LOC_B_C1}}</span></div>
+      </article>
+    </section>
+
+    <section class="panel" id="ledger" data-claim-id="META-1" data-claim-class="Metadata" data-anchor="{{ANCHOR_META}}"
+      data-severity="MAJOR" data-source-location="{{SOURCE_LOC_META}}">
+      <h2>Comparative Matrix + Ledger</h2>
+      <table>
+        <tr><th>Dimension</th><th>{{SOURCE_A_NAME}}</th><th>{{SOURCE_B_NAME}}</th></tr>
+        <tr><td>Data</td><td>{{DATA_A}}</td><td>{{DATA_B}}</td></tr>
+        <tr><td>Identification</td><td>{{ID_A}}</td><td>{{ID_B}}</td></tr>
+        <tr><td>Main effect</td><td>{{EFFECT_A}}</td><td>{{EFFECT_B}}</td></tr>
+      </table>
+      <p><strong>Ledger:</strong> <code>visual_digest_{{PAPER_SHORT}}.evidence_ledger.json</code></p>
+      <div class="anchor">{{ANCHOR_META}}</div>
+    </section>
+
+    <section class="panel" id="gate">
+      <h2>Gate + Reading Map</h2>
+      <p><strong>Gate:</strong> {{GATE_STATUS}} (strict={{STRICT_MODE}})</p>
+      <p><strong>Language:</strong> {{LANGUAGE_MODE}}</p>
+      <p>{{READING_MAP}}</p>
+    </section>
+  </main>
+
+  <script>
+    const cards = Array.from(document.querySelectorAll('.results-grid .claim-card'));
+    const btns = Array.from(document.querySelectorAll('#cmpFilter .btn'));
+    let active = 'all';
+
+    function paint() {
+      cards.forEach((c) => {
+        const paper = (c.dataset.paper || '').toLowerCase();
+        c.classList.toggle('hidden', !(active === 'all' || paper === active));
+      });
+    }
+
+    btns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btns.forEach((x) => x.classList.remove('active'));
+        btn.classList.add('active');
+        active = btn.dataset.filter;
+        paint();
+      });
+    });
+
+    paint();
+  </script>
+</body>
+
+</html>

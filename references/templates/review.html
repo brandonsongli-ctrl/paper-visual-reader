@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PAPER_TITLE}} · Review Visual Digest</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --bg-elevated: rgba(30, 41, 59, 0.9);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent-1: #38bdf8;
+            --accent-2: #818cf8;
+            --accent-3: #a78bfa;
+            --accent-4: #34d399;
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero {
+            padding: 32px;
+            border-radius: var(--radius);
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            margin: 0 0 12px;
+            font-size: 36px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero .badge {
+            display: inline-block;
+            background: rgba(167, 139, 250, 0.15);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            color: var(--accent-3);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            margin: 6px 0;
+            color: var(--text-dim);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .section-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent-1);
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .narrative-transition {
+            padding: 16px;
+            margin: 16px 0;
+            color: var(--text-dim);
+            border-left: 2px dashed rgba(255, 255, 255, 0.2);
+            font-style: italic;
+        }
+
+        .card h3 {
+            margin: 0 0 16px;
+            font-size: 18px;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .analysis-box {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            background: rgba(0, 0, 0, 0.3);
+            font-size: 0.95rem;
+        }
+
+        .analysis-box h4 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .intuition {
+            border-color: #fce762;
+        }
+
+        .intuition h4 {
+            color: #fce762;
+        }
+
+        .synthesis {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .synthesis h4 {
+            color: #38bdf8;
+        }
+
+        .framework-box {
+            border-color: #a78bfa;
+            background: rgba(167, 139, 250, 0.08);
+        }
+
+        .framework-box h4 {
+            color: #a78bfa;
+        }
+
+        .debate-box {
+            border-color: #fb923c;
+            background: rgba(251, 146, 60, 0.08);
+        }
+
+        .debate-box h4 {
+            color: #fb923c;
+        }
+
+        .frontier-box {
+            border-color: #34d399;
+            background: rgba(52, 211, 153, 0.08);
+        }
+
+        .frontier-box h4 {
+            color: #34d399;
+        }
+
+        ul {
+            margin: 8px 0;
+            padding-left: 20px;
+            color: #e2e8f0;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .anchor {
+            font-size: 12px;
+            color: var(--accent-2);
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 16px;
+        }
+
+        .meta {
+            display: none;
+        }
+
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .mini {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .mini strong {
+            color: var(--accent-2);
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .taxonomy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .taxonomy-item {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .taxonomy-item .tax-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .taxonomy-item .tax-label {
+            font-weight: 600;
+            color: var(--accent-3);
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+
+        .taxonomy-item .tax-desc {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.87rem;
+        }
+
+        td,
+        th {
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            padding: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Theme filter toolbar */
+        .toolbar {
+            margin-top: 16px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar .btn {
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-dim);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar .btn:hover {
+            border-color: var(--accent-1);
+            color: var(--text);
+        }
+
+        .toolbar .btn.active {
+            color: var(--text);
+            border-color: var(--accent-1);
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        .strand-tag {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            color: var(--accent-1);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            margin-right: 6px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="wrap">
+        <section class="hero" id="architecture">
+            <div class="badge">Literature Review · 文献综述</div>
+            <h1>{{PAPER_TITLE}}</h1>
+            <p><strong>{{AUTHORS}}</strong> · {{VENUE_YEAR}} · {{DOI_OR_URL}}</p>
+            <div class="narrative-transition">{{ONE_SENTENCE_TAKEAWAY}}</div>
+        </section>
+
+        <!-- 1. Scope & Central Question -->
+        <section class="section" id="scope">
+            <div class="section-header">
+                <div class="section-icon">🔭</div>
+                <h2 class="section-title">Scope & Central Question</h2>
+            </div>
+            <!-- AI INSTRUCTION: Describe the scope of the review — what question or debate does it organize the literature around? What is included vs. excluded? -->
+            <article class="card claim-card sev-STYLE" data-claim-id="SCOPE-1" data-claim-class="Result"
+                data-anchor="Scope" data-severity="STYLE" data-source-location="Main Paper §Introduction">
+                <div class="analysis-box intuition">
+                    <h4>🔭 Central Question</h4>
+                    <p>{{SCOPE_TEXT}}</p>
+                </div>
+                <div class="anchor">Scope — {{SCOPE_SOURCE}}</div>
+            </article>
+        </section>
+
+        <!-- 2. Conceptual Framework / Taxonomy -->
+        <section class="section" id="framework">
+            <div class="section-header">
+                <div class="section-icon">🗂️</div>
+                <h2 class="section-title">Conceptual Framework & Taxonomy</h2>
+            </div>
+            <!-- AI INSTRUCTION: Extract the author's organizing framework or taxonomy. Review articles almost always introduce a conceptual scheme that structures the literature discussion. Render it as a visual taxonomy grid. -->
+            <article class="card claim-card sev-BLOCKING" data-claim-id="FRAMEWORK-1" data-claim-class="Result"
+                data-anchor="Framework" data-severity="BLOCKING" data-source-location="{{FRAMEWORK_SOURCE}}">
+                <div class="analysis-box framework-box">
+                    <h4>🗂️ Organizing Taxonomy</h4>
+                    <p>{{FRAMEWORK_OVERVIEW}}</p>
+                </div>
+                <!-- AI INSTRUCTION: Duplicate the taxonomy-item blocks below for each category in the framework -->
+                <div class="taxonomy-grid">
+                    <div class="taxonomy-item">
+                        <div class="tax-icon">{{TAXON_ICON_1}}</div>
+                        <div class="tax-label">{{TAXON_LABEL_1}}</div>
+                        <div class="tax-desc">{{TAXON_DESC_1}}</div>
+                    </div>
+                    <div class="taxonomy-item">
+                        <div class="tax-icon">{{TAXON_ICON_2}}</div>
+                        <div class="tax-label">{{TAXON_LABEL_2}}</div>
+                        <div class="tax-desc">{{TAXON_DESC_2}}</div>
+                    </div>
+                    <div class="taxonomy-item">
+                        <div class="tax-icon">{{TAXON_ICON_3}}</div>
+                        <div class="tax-label">{{TAXON_LABEL_3}}</div>
+                        <div class="tax-desc">{{TAXON_DESC_3}}</div>
+                    </div>
+                </div>
+                <div class="anchor">Framework — {{FRAMEWORK_SOURCE}}</div>
+            </article>
+        </section>
+
+        <!-- 3. Thematic Strands -->
+        <section class="section" id="strands">
+            <div class="section-header">
+                <div class="section-icon">📜</div>
+                <h2 class="section-title">Thematic Strands</h2>
+            </div>
+            <div class="toolbar" id="strandFilter">
+                <button class="btn active" data-filter="all">All Themes</button>
+                <!-- AI INSTRUCTION: Add one button per thematic strand, e.g.: -->
+                <button class="btn" data-filter="strand-1">{{STRAND_1_SHORT}}</button>
+                <button class="btn" data-filter="strand-2">{{STRAND_2_SHORT}}</button>
+                <button class="btn" data-filter="strand-3">{{STRAND_3_SHORT}}</button>
+            </div>
+
+            <!-- AI INSTRUCTION: You MUST duplicate this entire article block for EVERY major thematic section of the review. Each strand corresponds to a major section or subsection of the paper. DO NOT collapse multiple themes into one card. -->
+            <article class="card claim-card sev-BLOCKING" data-claim-id="STRAND-1" data-claim-class="Result"
+                data-strand="strand-1" data-anchor="{{ANCHOR_STRAND_1}}" data-severity="BLOCKING"
+                data-source-location="{{SOURCE_LOC_STRAND_1}}">
+                <h3><span class="strand-tag">Strand 1</span> {{STRAND_1_TITLE}}</h3>
+                <div class="analysis-box synthesis">
+                    <h4>📖 Literature Synthesis</h4>
+                    <p>{{STRAND_1_SYNTHESIS}}</p>
+                </div>
+                <!-- AI INSTRUCTION: List key papers in this strand. Duplicate mini blocks as needed. -->
+                <div class="mini-grid">
+                    <div class="mini"><strong>{{PAPER_1A_CITE}}</strong>{{PAPER_1A_FINDING}}</div>
+                    <div class="mini"><strong>{{PAPER_1B_CITE}}</strong>{{PAPER_1B_FINDING}}</div>
+                </div>
+                <!-- AI INSTRUCTION: If there are open debates or conflicting findings, include: -->
+                <div class="analysis-box debate-box">
+                    <h4>⚖️ Key Debate / Open Question</h4>
+                    <p>{{STRAND_1_DEBATE}}</p>
+                </div>
+                <div class="anchor">{{ANCHOR_STRAND_1}} — {{SOURCE_LOC_STRAND_1}}</div>
+            </article>
+
+            <!-- AI INSTRUCTION: Duplicate additional strand blocks as STRAND-2, STRAND-3, etc. -->
+            <article class="card claim-card sev-BLOCKING" data-claim-id="STRAND-2" data-claim-class="Result"
+                data-strand="strand-2" data-anchor="{{ANCHOR_STRAND_2}}" data-severity="BLOCKING"
+                data-source-location="{{SOURCE_LOC_STRAND_2}}">
+                <h3><span class="strand-tag">Strand 2</span> {{STRAND_2_TITLE}}</h3>
+                <div class="analysis-box synthesis">
+                    <h4>📖 Literature Synthesis</h4>
+                    <p>{{STRAND_2_SYNTHESIS}}</p>
+                </div>
+                <div class="mini-grid">
+                    <div class="mini"><strong>{{PAPER_2A_CITE}}</strong>{{PAPER_2A_FINDING}}</div>
+                    <div class="mini"><strong>{{PAPER_2B_CITE}}</strong>{{PAPER_2B_FINDING}}</div>
+                </div>
+                <div class="analysis-box debate-box">
+                    <h4>⚖️ Key Debate / Open Question</h4>
+                    <p>{{STRAND_2_DEBATE}}</p>
+                </div>
+                <div class="anchor">{{ANCHOR_STRAND_2}} — {{SOURCE_LOC_STRAND_2}}</div>
+            </article>
+
+            <article class="card claim-card sev-BLOCKING" data-claim-id="STRAND-3" data-claim-class="Result"
+                data-strand="strand-3" data-anchor="{{ANCHOR_STRAND_3}}" data-severity="BLOCKING"
+                data-source-location="{{SOURCE_LOC_STRAND_3}}">
+                <h3><span class="strand-tag">Strand 3</span> {{STRAND_3_TITLE}}</h3>
+                <div class="analysis-box synthesis">
+                    <h4>📖 Literature Synthesis</h4>
+                    <p>{{STRAND_3_SYNTHESIS}}</p>
+                </div>
+                <div class="mini-grid">
+                    <div class="mini"><strong>{{PAPER_3A_CITE}}</strong>{{PAPER_3A_FINDING}}</div>
+                    <div class="mini"><strong>{{PAPER_3B_CITE}}</strong>{{PAPER_3B_FINDING}}</div>
+                </div>
+                <div class="analysis-box debate-box">
+                    <h4>⚖️ Key Debate / Open Question</h4>
+                    <p>{{STRAND_3_DEBATE}}</p>
+                </div>
+                <div class="anchor">{{ANCHOR_STRAND_3}} — {{SOURCE_LOC_STRAND_3}}</div>
+            </article>
+        </section>
+
+        <!-- 4. Cross-Cutting Insights -->
+        <section class="section" id="crosscut">
+            <div class="section-header">
+                <div class="section-icon">🔗</div>
+                <h2 class="section-title">Cross-Cutting Insights</h2>
+            </div>
+            <!-- AI INSTRUCTION: Extract insights that emerge from comparing across strands. These are the review's integrative contributions — patterns or tensions that only become visible when the literature is viewed holistically. -->
+            <article class="card claim-card sev-MAJOR" data-claim-id="CROSSCUT-1" data-claim-class="Result"
+                data-anchor="Cross-Cutting" data-severity="MAJOR" data-source-location="{{CROSSCUT_SOURCE}}">
+                <div class="analysis-box synthesis">
+                    <h4>🔗 Integrative Patterns</h4>
+                    <ul>
+                        <!-- AI INSTRUCTION: List the key cross-cutting insights -->
+                        <li>{{CROSSCUT_INSIGHT_1}}</li>
+                        <li>{{CROSSCUT_INSIGHT_2}}</li>
+                        <li>{{CROSSCUT_INSIGHT_3}}</li>
+                    </ul>
+                </div>
+                <div class="anchor">Cross-Cutting — {{CROSSCUT_SOURCE}}</div>
+            </article>
+        </section>
+
+        <!-- 5. Research Frontier -->
+        <section class="section" id="frontier">
+            <div class="section-header">
+                <div class="section-icon">🚀</div>
+                <h2 class="section-title">Research Frontier & Future Directions</h2>
+            </div>
+            <!-- AI INSTRUCTION: Extract the author's explicit future research directions. These are high-value signals about where the field is heading. -->
+            <article class="card claim-card sev-MAJOR" data-claim-id="FRONTIER-1" data-claim-class="Result"
+                data-anchor="Frontier" data-severity="MAJOR" data-source-location="{{FRONTIER_SOURCE}}">
+                <div class="analysis-box frontier-box">
+                    <h4>🚀 Open Questions & Future Work</h4>
+                    <ul>
+                        <!-- AI INSTRUCTION: Duplicate li blocks for each future research direction identified -->
+                        <li>{{FRONTIER_DIRECTION_1}}</li>
+                        <li>{{FRONTIER_DIRECTION_2}}</li>
+                        <li>{{FRONTIER_DIRECTION_3}}</li>
+                    </ul>
+                </div>
+                <div class="anchor">Frontier — {{FRONTIER_SOURCE}}</div>
+            </article>
+        </section>
+
+        <!-- 6. Conclusion -->
+        <section class="section" id="conclusion">
+            <div class="section-header">
+                <div class="section-icon">🏁</div>
+                <h2 class="section-title">Conclusion & Broader Impact</h2>
+            </div>
+            <article class="card claim-card sev-STYLE" data-claim-id="CONCLUSION-1" data-claim-class="Result"
+                data-anchor="Conclusion" data-severity="STYLE" data-source-location="Main Paper §Conclusion">
+                <div class="analysis-box intuition">
+                    <h4>🏁 Core Takeaway</h4>
+                    <p>{{CONCLUSION_TEXT}}</p>
+                </div>
+                <div class="anchor">Conclusion</div>
+            </article>
+        </section>
+
+        <!-- Ledger -->
+        <section class="section" id="ledger">
+            <div class="section-header">
+                <div class="section-icon">🧾</div>
+                <h2 class="section-title">Evidence Ledger</h2>
+            </div>
+
+            <article class="card claim-card sev-MAJOR" data-claim-id="META-1" data-claim-class="Metadata"
+                data-anchor="{{ANCHOR_META}}" data-severity="MAJOR" data-source-location="{{SOURCE_LOC_META}}">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="width: 150px; color: var(--text-dim);"><strong>Ledger File</strong></td>
+                            <td><code>visual_digest_{{PAPER_SHORT}}.evidence_ledger.json</code></td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-dim);"><strong>Gate Status</strong></td>
+                            <td><strong style="color: var(--accent-1);">{{GATE_STATUS}}</strong>
+                                (strict={{STRICT_MODE}})</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-dim);"><strong>Language</strong></td>
+                            <td>{{LANGUAGE_MODE}}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-dim);"><strong>Template</strong></td>
+                            <td>Review</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-dim);"><strong>Reading Map</strong></td>
+                            <td>{{READING_MAP}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="anchor">{{ANCHOR_META}}</div>
+            </article>
+        </section>
+
+        <article class="card hidden" id="gate">
+            <h3>Gate + Reading Map</h3>
+            <p><strong>Gate:</strong> {{GATE_STATUS}} (strict={{STRICT_MODE}})</p>
+        </article>
+    </main>
+
+    <script>
+        /* Strand filter interactivity */
+        const strandCards = Array.from(document.querySelectorAll('#strands .claim-card'));
+        const strandBtns = Array.from(document.querySelectorAll('#strandFilter .btn'));
+        let activeStrand = 'all';
+
+        function paintStrands() {
+            strandCards.forEach(c => {
+                const strand = (c.dataset.strand || '').toLowerCase();
+                c.classList.toggle('hidden', !(activeStrand === 'all' || strand === activeStrand));
+            });
+        }
+
+        strandBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                strandBtns.forEach(x => x.classList.remove('active'));
+                btn.classList.add('active');
+                activeStrand = btn.dataset.filter;
+                paintStrands();
+            });
+        });
+
+        paintStrands();
+    </script>
+</body>
+
+</html>

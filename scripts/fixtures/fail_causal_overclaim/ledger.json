@@ -1,0 +1,18 @@
+{
+  "version": "EvidenceLedgerV1",
+  "mode": "A",
+  "source": "source.txt",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_class": "Causal",
+      "claim_text": "This proves the policy causes a definitive increase of 1.25 in outcomes.",
+      "anchor": "Section 5, p.13",
+      "source_location": "Main Paper §5",
+      "severity": "MAJOR",
+      "confidence": 0.9,
+      "status": "VERIFIED",
+      "notes": "Intentional overclaim"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "version": "EvidenceLedgerV1",
+  "mode": "A",
+  "source": "source.txt",
+  "claims": [
+    {
+      "claim_id": "N1",
+      "claim_class": "Numeric",
+      "claim_text": "The treatment coefficient is 999 with N = 320.",
+      "anchor": "Table 1, p.8",
+      "source_location": "Main Paper §3",
+      "severity": "BLOCKING",
+      "confidence": 0.92,
+      "status": "VERIFIED",
+      "notes": "999 is untraceable"
+    }
+  ]
+}

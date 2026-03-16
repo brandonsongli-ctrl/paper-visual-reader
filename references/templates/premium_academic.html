@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PAPER_TITLE}} · Visual Digest</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;700;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #f8f9fa;
+            --sidebar: #ffffff;
+            --primary: #1a1a1a;
+            --secondary: #4a5568;
+            --accent: #2d3748;
+            --border: #e2e8f0;
+            --text-main: #2d3748;
+            --text-heading: #1a202c;
+            --text-muted: #718096;
+            --math-bg: #fdfdfd;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.8;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+        }
+
+        aside {
+            width: 320px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border);
+            padding: 40px;
+            background: var(--sidebar);
+            overflow-y: auto;
+        }
+
+        aside h1 {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--text-heading);
+            margin-bottom: 40px;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        nav ul { list-style: none; padding: 0; margin: 0; }
+        nav li { margin-bottom: 12px; }
+        nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        nav a:hover { color: var(--text-heading); background: var(--surface); }
+
+        main {
+            margin-left: 320px;
+            width: 100%;
+            max-width: 900px;
+            padding: 80px 120px;
+        }
+
+        header { margin-bottom: 120px; }
+        .authors { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; font-weight: 700; }
+        .journal { font-size: 0.9rem; color: var(--text-muted); font-style: italic; }
+
+        section { margin-bottom: 160px; scroll-margin-top: 40px; }
+        h2 { font-size: 2.5rem; font-weight: 900; color: var(--text-heading); margin-bottom: 40px; letter-spacing: -0.04em; }
+
+        p { margin-bottom: 32px; font-family: 'Crimson Pro', serif; font-size: 1.35rem; color: var(--text-main); }
+
+        .content-card {
+            background: var(--surface);
+            padding: 60px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 60px;
+        }
+
+        .eq-block {
+            background: var(--math-bg);
+            padding: 40px;
+            border-radius: 8px;
+            margin: 40px 0;
+            text-align: center;
+            border: 1px solid var(--border);
+            font-size: 1.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .interpretation-box {
+            border-left: 4px solid var(--primary);
+            padding-left: 32px;
+            margin: 60px 0;
+        }
+        .interpretation-box strong {
+            display: block;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .interpretation-box p { font-style: italic; color: var(--secondary); font-size: 1.25rem; }
+
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            background: #edf2f7;
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: var(--secondary);
+            text-transform: uppercase;
+        }
+
+        footer {
+            margin-top: 200px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1200px) {
+            aside { width: 260px; padding: 20px; }
+            main { margin-left: 260px; padding: 40px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <h1>{{PAPER_TITLE}}</h1>
+        <nav>
+            <ul>
+                <!-- AI: Generate semantic navigation based on paper sections -->
+                <li><a href="#section-1">{{SECTION_1_TITLE}}</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main>
+        <header>
+            <div class="authors">{{AUTHORS}}</div>
+            <div class="journal">{{VENUE}} · {{YEAR}}</div>
+        </header>
+
+        <!-- AI: Generate sections here -->
+        <section id="section-1">
+            <h2>{{SECTION_1_TITLE}}</h2>
+            <div class="content-card">
+                <p>{{SECTION_1_CONTENT}}</p>
+                <div class="interpretation-box">
+                    <strong>Interpretation</strong>
+                    <p>{{SECTION_1_INTERPRETATION}}</p>
+                </div>
+                <span class="tag">Source: {{SOURCE_LOC}}</span>
+            </div>
+        </section>
+
+        <footer>
+            <p><strong>Visual Encyclopedia Digest</strong></p>
+            <p>Generated by <code>paper-visual-reader v3.0</code> · Premium minimalist Edition</p>
+        </footer>
+    </main>
+</body>
+</html>

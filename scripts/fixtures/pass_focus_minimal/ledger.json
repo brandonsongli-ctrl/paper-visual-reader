@@ -1,0 +1,29 @@
+{
+  "version": "EvidenceLedgerV1",
+  "mode": "B",
+  "source": "source.txt",
+  "claims": [
+    {
+      "claim_id": "B1",
+      "claim_class": "Result",
+      "claim_text": "Focused sample result is positive.",
+      "anchor": "Section 2, p.4",
+      "source_location": "Main Paper §2",
+      "severity": "BLOCKING",
+      "confidence": 0.91,
+      "status": "VERIFIED",
+      "notes": "Focused mode pass"
+    },
+    {
+      "claim_id": "BM1",
+      "claim_class": "Mechanism",
+      "claim_text": "Mechanism interpretation remains conditional.",
+      "anchor": "Section 3, p.5",
+      "source_location": "Main Paper §3",
+      "severity": "MAJOR",
+      "confidence": 0.82,
+      "status": "VERIFIED",
+      "notes": "Interpretive claim"
+    }
+  ]
+}
