@@ -6,6 +6,17 @@ description: "Visual-layout paper reader that outputs standalone HTML digests wi
 
 Generate standalone HTML visual digests for academic papers with deterministic evidence gating.
 
+## Default Mode: Premium
+
+Premium mode is the default. It produces digests that are MORE informative than reading the original paper by adding:
+- Plain-English restatements of every formal result
+- Economic/mathematical intuition paragraphs (>=100 words each)
+- Connections to prior literature
+- Concrete examples or numerical illustrations
+- Notation explained inline on first use
+- Cross-references hyperlinked between sections
+- Proof strategy summaries before full proofs
+
 ## Core Contract
 
 Always produce:
@@ -21,12 +32,28 @@ Optional outputs:
 - `visual_digest_<paper>.claims.csv`
 - `visual_digest_<paper>.gate_summary.txt`
 
+## Output Directory Convention
+
+Output directory: `paper_digest_<FirstAuthor>_<Year>_<ShortTitle>/`
+- `digest.html` -- Main visual digest
+- `evidence_ledger.json` -- Claim-level evidence mapping
+- `guard_report.md` -- Anti-hallucination report (human-readable)
+- `guard_report.json` -- Anti-hallucination report (machine-readable)
+
+## Detail Level
+
+| Level | Min Word Count | Interpretation | Proofs |
+|-------|---------------|----------------|--------|
+| standard | 1/2 of source | Required for main results | Sketch only |
+| premium (DEFAULT) | 2/3 of source | Required for ALL results | Strategy + key steps |
+| deep | Full reproduction | Required for ALL items | Full reproduction |
+
 ## Output Constraints (User-Defined)
 
-- In HTML output, do not use the em dash character (`—`). It is only allowed when directly quoting source text that contains an em dash; keep it inside a quote and tie it to a source location in the evidence ledger. Use commas, colons, or secondary sentences for transitions.
-- The visual digest word count (visible text only, excluding HTML tags, scripts, and styles) must be at least 1/4 of the source paper word count. This is a hard floor to ensure pedagogical depth.
+- In HTML output, do not use the em dash character (`---`). It is only allowed when directly quoting source text that contains an em dash; keep it inside a quote and tie it to a source location in the evidence ledger. Use commas, colons, or secondary sentences for transitions.
+- The visual digest word count (visible text only, excluding HTML tags, scripts, and styles) must be at least 1/2 of the source paper word count. This is a dynamic hard floor scaled to the specific paper being processed to ensure pedagogical depth. Failure to meet this relative floor renders the output invalid.
 - Do not pad with low-quality filler. Add interpretation that explains implications, connections, or reasoning beyond surface paraphrase, while staying grounded in the source. Use the `interpretation-box` or `analysis-box` components.
-- Style Preference: Default to the "Premium Academic" template (`references/templates/premium_academic.html`). This features a white/neutral minimalist aesthetic, `Crimson Pro` serif body text, and sidebar navigation. Avoid "loud" neon or high-contrast dark themes unless explicitly requested.
+- Style Preference: **Always** use the "Premium Academic" template (`references/templates/premium_academic.html`) as the default and mandatory choice. This features a white/neutral minimalist aesthetic, `Crimson Pro` serif body text, and sidebar navigation. Do not use other templates unless explicitly requested.
 - **Anti-Overflow Mechanism**: All mathematical formulas and tables MUST be wrapped in containers with `overflow-x: auto` and `-webkit-overflow-scrolling: touch`. This ensures that long equations do not break the layout on narrow screens or within fixed-width cards.
 - Avoid self-referential or promotional boilerplate in HTML. Do not claim the digest is definitive, exhaustive, or that it satisfies word count requirements.
 
@@ -55,6 +82,28 @@ python3 scripts/anti_hallucination_guard.py \
   --strict
 ```
 6. **Iterate**: If the guard returns FAIL or WARN, adjust your Ledger and HTML equations to mathematically match the extracted text, and run the guard again until PASS.
+
+## Interpretation Mandate (Non-Negotiable)
+
+Every theorem, proposition, lemma, and definition MUST include:
+1. **Restatement**: Plain-English version of the formal claim
+2. **Intuition**: >=100 words explaining WHY this result holds and what drives it
+3. **Literature context**: How this relates to 2-3 prior results in the field
+4. **Example**: A concrete numerical or graphical illustration (where applicable)
+5. **Implication**: What this means for the paper's overall argument
+
+Failure to include interpretation = BLOCKING violation in the guard.
+
+## Comprehension Enhancement Rules
+
+These rules ensure the digest is MORE useful than the original paper:
+
+1. **Notation**: Every symbol must be defined inline on FIRST use, with a link to the glossary
+2. **Cross-references**: Every reference to another section/result must be a clickable hyperlink
+3. **Proof sketches**: Before any proof, include a 2-3 sentence "Proof Strategy" explaining the approach
+4. **Figures/Tables**: Every figure and table must have an interpretation paragraph (>=50 words)
+5. **Assumptions**: Each assumption must have a "Why this is needed" note
+6. **Connections**: Each section must end with a "Connection to next section" transition
 
 ## Legacy CLI (Regex Baseline - DO NOT USE FOR PROD)
 
@@ -107,6 +156,10 @@ See: `references/evidence_ledger_schema.md`
 
 Strict mode blocks both `WARN` and `FAIL`.
 
+### Round 12: Interpretation Grounding
+
+Every "Author's Interpretation" or "Why This Matters" box MUST cite at least one claim_id from the evidence ledger. Interpretation without grounding = MINOR violation.
+
 ## Theory Reinforcement (v3)
 
 Theory template enforces layered rendering:
@@ -123,11 +176,11 @@ This structure is designed to make theorem dependency scanning faster than raw-p
 
 Review/survey template enforces thematic strand rendering for literature review articles (Annual Reviews, JEL surveys, Handbook chapters):
 
-1. scope (`#scope`) — central question and review boundaries
-2. framework (`#framework`) — author's organizing taxonomy/typology
-3. strands (`#strands`) — N thematic literature strand cards with key papers and debates
-4. crosscut (`#crosscut`) — cross-cutting insights across strands
-5. frontier (`#frontier`) — future research directions
+1. scope (`#scope`) -- central question and review boundaries
+2. framework (`#framework`) -- author's organizing taxonomy/typology
+3. strands (`#strands`) -- N thematic literature strand cards with key papers and debates
+4. crosscut (`#crosscut`) -- cross-cutting insights across strands
+5. frontier (`#frontier`) -- future research directions
 6. conclusion (`#conclusion`)
 7. ledger (`#ledger`)
 
@@ -173,6 +226,14 @@ This structure is designed to make literature mapping faster than linear reading
 - [ ] HTML has no em dash characters except direct source quotes with ledger anchors
 - [ ] Visible digest word count is at least 1/4 of the source paper word count
 - [ ] Digest includes interpretation without low-quality filler or self-referential boilerplate
+- [ ] Every theorem/proposition/lemma has Restatement + Intuition + Literature Context + Example + Implication
+- [ ] Every symbol defined inline on first use with glossary link
+- [ ] Every cross-reference is a clickable hyperlink
+- [ ] Every proof preceded by Proof Strategy summary
+- [ ] Every figure/table has interpretation paragraph (>=50 words)
+- [ ] Every assumption has "Why this is needed" note
+- [ ] Every section ends with "Connection to next section" transition
+- [ ] Every interpretation box cites at least one claim_id (Round 12 compliance)
 
 <!-- ANTI_HALLUCINATION_SKILL_PROFILE_V2:paper-visual-reader:7258e1ec1a2f -->
 ## Anti-Hallucination Module: paper-visual-reader
