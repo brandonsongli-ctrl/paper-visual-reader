@@ -228,8 +228,154 @@
             flex: 1;
             min-width: 0;
             max-width: 860px;
-            margin: 0 auto;
-            padding: 48px 64px 80px;
+            padding: 48px 56px 80px 64px;
+        }
+
+        /* ========================================================
+           RIGHT MARGIN PANEL (Tufte-style persistent context)
+           ======================================================== */
+        #right-panel {
+            width: 260px;
+            min-width: 260px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            right: 0;
+            padding: 48px 24px 40px 16px;
+            overflow-y: auto;
+            border-left: 1px solid var(--sidebar-border);
+            background: var(--bg);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #right-panel .rp-section {
+            margin-bottom: 28px;
+        }
+
+        #right-panel .rp-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--sidebar-border);
+        }
+
+        /* At-a-Glance stats */
+        .rp-stats {
+            list-style: none;
+            padding: 0;
+        }
+
+        .rp-stats li {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px dotted var(--card-border);
+        }
+
+        .rp-stats li:last-child {
+            border-bottom: none;
+        }
+
+        .rp-stats .stat-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.82rem;
+        }
+
+        /* Evidence quality meter */
+        .rp-meter {
+            height: 6px;
+            background: var(--surface);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .rp-meter-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .rp-meter-fill[data-quality="high"] { background: var(--accent-green); }
+        .rp-meter-fill[data-quality="medium"] { background: var(--accent-amber); }
+        .rp-meter-fill[data-quality="low"] { background: var(--accent-red); }
+
+        /* Key definitions quick-ref */
+        .rp-def-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .rp-def-list li {
+            font-size: 0.8rem;
+            color: var(--text-body);
+            padding: 4px 0;
+            line-height: 1.5;
+        }
+
+        .rp-def-list .def-term {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent-blue);
+            display: block;
+        }
+
+        .rp-def-list .def-desc {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        /* Current section indicator */
+        #rp-current-section {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            padding: 8px 12px;
+            background: var(--accent-blue-bg);
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-blue);
+            line-height: 1.4;
+        }
+
+        /* Contribution highlights */
+        .rp-contributions {
+            list-style: none;
+            padding: 0;
+        }
+
+        .rp-contributions li {
+            font-size: 0.78rem;
+            color: var(--text-body);
+            padding: 5px 0 5px 16px;
+            position: relative;
+            line-height: 1.5;
+            border-bottom: 1px dotted var(--card-border);
+        }
+
+        .rp-contributions li:last-child {
+            border-bottom: none;
+        }
+
+        .rp-contributions li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 11px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-blue);
         }
 
         /* ========================================================
@@ -833,6 +979,23 @@
         /* ========================================================
            MOBILE RESPONSIVE
            ======================================================== */
+        @media (max-width: 1400px) {
+            #right-panel {
+                width: 220px;
+                min-width: 220px;
+                padding: 40px 16px 32px 12px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            #right-panel {
+                display: none;
+            }
+            #content-area {
+                margin: 0 auto;
+            }
+        }
+
         @media (max-width: 1024px) {
             #sidebar {
                 width: 240px;
@@ -928,7 +1091,7 @@
            PRINT-FRIENDLY CSS
            ======================================================== */
         @media print {
-            #sidebar, #toolbar, #progress-bar, #search-bar {
+            #sidebar, #toolbar, #progress-bar, #search-bar, #right-panel {
                 display: none !important;
             }
 
@@ -1078,6 +1241,61 @@
         </footer>
     </div>
 
+    <!-- Right Margin Panel -->
+    <aside id="right-panel">
+        <!-- Current Section Indicator (dynamic) -->
+        <div class="rp-section">
+            <div class="rp-label">Reading</div>
+            <div id="rp-current-section">Key Takeaways</div>
+        </div>
+
+        <!-- At-a-Glance Stats -->
+        <div class="rp-section">
+            <div class="rp-label">At a Glance</div>
+            <ul class="rp-stats">
+                <li>Type <span class="stat-value">{{PAPER_TYPE}}</span></li>
+                <li>Year <span class="stat-value">{{YEAR}}</span></li>
+                <li>Field <span class="stat-value">{{FIELD}}</span></li>
+            </ul>
+        </div>
+
+        <!-- Evidence Quality -->
+        <div class="rp-section">
+            <div class="rp-label">Evidence Quality</div>
+            <div class="rp-meter">
+                <div class="rp-meter-fill" data-quality="{{EVIDENCE_QUALITY}}" style="width: {{EVIDENCE_PCT}}%"></div>
+            </div>
+            <ul class="rp-stats" style="margin-top: 8px;">
+                <li>Strong <span class="stat-value" style="color:var(--accent-green)">{{N_STRONG}}</span></li>
+                <li>Moderate <span class="stat-value" style="color:var(--accent-amber)">{{N_MODERATE}}</span></li>
+                <li>Weak <span class="stat-value" style="color:var(--accent-red)">{{N_WEAK}}</span></li>
+            </ul>
+        </div>
+
+        <!-- Key Contributions -->
+        <div class="rp-section">
+            <div class="rp-label">Contributions</div>
+            <ul class="rp-contributions">
+                {{RIGHT_PANEL_CONTRIBUTIONS}}
+                <!-- Example: <li>Establishes causal link between X and Y</li> -->
+            </ul>
+        </div>
+
+        <!-- Key Notation Quick-Ref -->
+        <div class="rp-section">
+            <div class="rp-label">Key Notation</div>
+            <ul class="rp-def-list">
+                {{RIGHT_PANEL_NOTATION}}
+                <!-- Example:
+                <li>
+                    <span class="def-term">$\theta$</span>
+                    <span class="def-desc">State of the world</span>
+                </li>
+                -->
+            </ul>
+        </div>
+    </aside>
+
     <!-- ============================================================
          JAVASCRIPT
          ============================================================ -->
@@ -1141,6 +1359,8 @@
                 threshold: 0
             };
 
+            const rpCurrentSection = document.getElementById('rp-current-section');
+
             const observer = new IntersectionObserver(function(entries) {
                 entries.forEach(function(entry) {
                     if (entry.isIntersecting) {
@@ -1149,6 +1369,10 @@
                             link.classList.remove('active');
                             if (link.getAttribute('href') === '#' + id) {
                                 link.classList.add('active');
+                                /* Update right panel current section */
+                                if (rpCurrentSection) {
+                                    rpCurrentSection.textContent = link.textContent;
+                                }
                             }
                         });
                     }
