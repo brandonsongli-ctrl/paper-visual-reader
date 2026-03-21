@@ -193,6 +193,98 @@ This structure is designed to make literature mapping faster than linear reading
 3. severity color stripes
 4. evidence ledger panel and gate panel
 
+## Interactive Visualization Module (v4)
+
+Every digest SHOULD include inline interactive Canvas/SVG widgets embedded after key result cards. This makes the digest MORE useful than the paper by letting readers manipulate parameters and build geometric intuition.
+
+### When to Generate
+
+Scan every definition, proposition, theorem, and key equation. Generate a visualization when any pattern is detected:
+
+| Pattern | Viz Type | Triggers |
+|---------|----------|----------|
+| Belief → action mapping | **EU Lines + Belief Partition** | "optimal action", "best response", N(a), normal cone |
+| Concavification / value function | **Concavification Diagram** | "concave closure", V̂(μ), "concavification" |
+| Set-valued maps on simplex | **Simplex Heatmap** | "for all μ ∈ Δ(Ω)", "rationalizing priors", "identified set" |
+| Payoff vectors in R^n | **Payoff Space + Hyperplane** | φ(a), "supporting hyperplane", "normal cone" |
+| Comparative statics (1 param) | **Slider + Live Plot** | "increasing in", "monotone in", ∂/∂ |
+| Signal / information structure | **Posterior Distribution** | "Bayes plausibility", "splitting", "distribution of posteriors" |
+| Optimization landscape | **Contour / Surface** | "saddle point", "minimax", "maximizes" |
+| Threshold / cutoff rules | **Threshold Diagram** | "cutoff", "threshold rule", "if and only if μ ≥ c" |
+
+### Embedding Structure
+
+Place each visualization `<div class="interactive-viz">` immediately after the `.result-card` it illustrates. Structure:
+
+```html
+<div class="interactive-viz" id="viz-{claim_id}">
+  <div class="viz-header">
+    <span class="viz-badge">Interactive</span>
+    <span class="viz-title">{Description, e.g. "Belief partition for Proposition 1"}</span>
+    <button class="viz-fullscreen-btn" onclick="toggleFullscreen('viz-{claim_id}')">⛶</button>
+  </div>
+  <div class="viz-body">
+    <canvas id="canvas-{claim_id}" width="700" height="400"></canvas>
+  </div>
+  <div class="viz-controls">
+    <!-- Preset buttons matching paper examples, sliders for parameters -->
+  </div>
+  <div class="viz-caption"><p>Drag points to change parameters. Hover for values.</p></div>
+</div>
+<script>
+(function() {
+  // Self-contained visualization code using canvas API
+  // Must include: draw function, event listeners (mousemove, mousedown, etc.)
+  // Must render axis labels, curves, shaded regions, tooltips
+})();
+</script>
+```
+
+### Implementation Rules
+
+1. **Self-contained**: All JS in an IIFE `(function(){...})()` after the viz div. No external deps beyond KaTeX.
+2. **Canvas-based**: HTML5 Canvas for real-time hover/drag. SVG acceptable for static diagrams only.
+3. **Colorblind-friendly**: palette `["#2563eb","#dc2626","#059669","#d97706","#7c3aed","#0891b2"]`.
+4. **Labeled**: All axes, curves, and regions must have text labels rendered on the canvas.
+5. **Hover tooltip**: Show a floating div with exact values (belief, EU values, optimal action) on mousemove.
+6. **Draggable**: Where applicable, let users drag points (payoff vectors, parameters) for live updates.
+7. **Presets**: Include 2-3 preset buttons matching examples from the paper. First preset loads by default.
+8. **Fullscreen toggle**: Every viz has ⛶ button. JS: `function toggleFullscreen(id){document.getElementById(id).classList.toggle('fullscreen');...}`.
+9. **Dark mode aware**: Read `document.documentElement.dataset.theme` for colors; re-render on theme change.
+10. **Print-safe**: Use `@media print { .interactive-viz canvas { display:none; } .viz-print-fallback { display:block; } }` with a static summary.
+
+### Minimum Visualization Count
+
+| Paper Type | Min Interactive Vizs |
+|-----------|---------------------|
+| Theory (micro, game theory, info design) | 3 |
+| Empirical | 1 (coefficient plot or regression surface) |
+| Survey/Review | 2 (framework diagram + key result) |
+
+### CSS (include in template `<style>`)
+
+```css
+.interactive-viz { margin:1.5rem 0; border:1px solid var(--card-border); border-radius:8px; overflow:hidden; background:var(--card-bg); box-shadow:var(--card-shadow); }
+.viz-header { display:flex; align-items:center; gap:0.5rem; padding:0.6rem 1rem; background:var(--surface); border-bottom:1px solid var(--card-border); font-family:'Inter',sans-serif; }
+.viz-badge { background:var(--accent-blue); color:white; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+.viz-title { font-size:0.85rem; font-weight:500; color:var(--text-primary); }
+.viz-fullscreen-btn { margin-left:auto; background:none; border:1px solid var(--card-border); border-radius:4px; padding:2px 6px; cursor:pointer; font-size:1rem; color:var(--text-secondary); }
+.viz-body { padding:0.5rem; display:flex; justify-content:center; }
+.viz-body canvas { max-width:100%; }
+.viz-controls { padding:0.5rem 1rem; border-top:1px solid var(--card-border); display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; font-family:'Inter',sans-serif; font-size:0.8rem; }
+.viz-controls button { padding:4px 10px; border:1px solid var(--card-border); border-radius:4px; background:var(--surface); cursor:pointer; font-size:0.75rem; color:var(--text-body); }
+.viz-controls button:hover { background:var(--surface-hover); }
+.viz-controls button.active { background:var(--accent-blue); color:white; border-color:var(--accent-blue); }
+.viz-controls input[type="range"] { width:120px; }
+.viz-caption { padding:0.4rem 1rem 0.6rem; font-size:0.75rem; color:var(--text-secondary); font-style:italic; }
+.interactive-viz.fullscreen { position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999; border-radius:0; }
+@media print { .interactive-viz canvas { display:none; } .viz-controls { display:none; } }
+```
+
+### Reference
+
+See `references/interactive_viz_catalog.md` for reusable code templates of each visualization type.
+
 ## Scripts
 
 - `scripts/source_extractor.py`: extraction and OCR fallback
@@ -214,6 +306,7 @@ This structure is designed to make literature mapping faster than linear reading
 9. `references/templates/comparative.html`
 10. `references/templates/review.html`
 11. `references/templates/premium_academic.html`
+12. `references/interactive_viz_catalog.md`
 
 ## Final Checklist
 
@@ -234,6 +327,9 @@ This structure is designed to make literature mapping faster than linear reading
 - [ ] Every assumption has "Why this is needed" note
 - [ ] Every section ends with "Connection to next section" transition
 - [ ] Every interpretation box cites at least one claim_id (Round 12 compliance)
+- [ ] Interactive visualizations meet minimum count for paper type (v4)
+- [ ] Each visualization is self-contained (IIFE), canvas-based, with presets from paper examples
+- [ ] Visualization CSS classes included in template style block
 
 <!-- ANTI_HALLUCINATION_SKILL_PROFILE_V2:paper-visual-reader:7258e1ec1a2f -->
 ## Anti-Hallucination Module: paper-visual-reader
