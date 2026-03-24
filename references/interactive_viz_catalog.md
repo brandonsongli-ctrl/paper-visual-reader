@@ -28,6 +28,142 @@ function getThemeColors() {
 
 // Color palette (colorblind-friendly)
 const COLORS = ['#2563eb','#dc2626','#059669','#d97706','#7c3aed','#0891b2'];
+
+// ─── Label Collision Manager (include once per digest) ───
+// Prevents text labels from overlapping each other, chart titles, and curves.
+// Usage: create one LabelManager per draw() call, then use lm.place() instead of ctx.fillText().
+class LabelManager {
+  constructor(ctx, plotBounds) {
+    this.ctx = ctx;
+    this.placed = []; // [{x, y, w, h}] bounding boxes of placed labels
+    // plotBounds = {left, top, right, bottom} — canvas pixel region labels must stay inside
+    this.bounds = plotBounds || { left: 0, top: 0, right: ctx.canvas.width, bottom: ctx.canvas.height };
+  }
+
+  // Measure a label's bounding box at a candidate position
+  _bbox(text, x, y, align, font) {
+    this.ctx.save();
+    if (font) this.ctx.font = font;
+    const m = this.ctx.measureText(text);
+    const h = parseInt(this.ctx.font, 10) * 1.3; // approximate line height
+    let lx = x;
+    if (align === 'center') lx = x - m.width / 2;
+    else if (align === 'right') lx = x - m.width;
+    this.ctx.restore();
+    return { x: lx, y: y - h, w: m.width, h: h };
+  }
+
+  // Check if two boxes overlap (with padding)
+  _overlaps(a, b, pad) {
+    pad = pad || 3;
+    return !(a.x - pad > b.x + b.w + pad || a.x + a.w + pad < b.x - pad ||
+             a.y - pad > b.y + b.h + pad || a.y + a.h + pad < b.y - pad);
+  }
+
+  // Check if box is inside the plot area
+  _inBounds(box) {
+    return box.x >= this.bounds.left - 2 && box.x + box.w <= this.bounds.right + 2 &&
+           box.y >= this.bounds.top - 2 && box.y + box.h <= this.bounds.bottom + 2;
+  }
+
+  // Register a reserved zone (e.g., chart title, axis label) that labels must avoid
+  reserve(x, y, w, h) {
+    this.placed.push({ x, y, w, h });
+  }
+
+  // Place a label with collision avoidance.
+  // anchorX, anchorY: the data point the label describes.
+  // opts: { font, color, align, offsets, leaderColor }
+  // offsets: array of [dx, dy] candidates to try (default: 8 directions)
+  place(text, anchorX, anchorY, opts) {
+    opts = opts || {};
+    const font = opts.font || this.ctx.font;
+    const color = opts.color || this.ctx.fillStyle;
+    const align = opts.align || 'left';
+    const leaderColor = opts.leaderColor || color;
+
+    // Default offset candidates: right, above-right, above, above-left, left,
+    // below-right, below, below-left, then farther offsets
+    const base = 12;
+    const defaultOffsets = [
+      [base, -base/2],           // right (default)
+      [base, -base*1.5],         // above-right
+      [0, -base*1.8],            // above
+      [-base, -base*1.5],        // above-left
+      [-base, -base/2],          // left
+      [base, base*1.2],          // below-right
+      [0, base*1.5],             // below
+      [-base, base*1.2],         // below-left
+      [base*2.5, -base*2],       // far above-right
+      [-base*2.5, -base*2],      // far above-left
+      [base*2.5, base*2],        // far below-right
+      [-base*2.5, base*2],       // far below-left
+      [base*4, -base*3],         // very far (leader line territory)
+      [-base*4, -base*3],
+      [base*4, base*3],
+      [-base*4, base*3],
+    ];
+    const offsets = opts.offsets || defaultOffsets;
+
+    this.ctx.save();
+    this.ctx.font = font;
+
+    // Try each offset candidate
+    let bestBox = null, bestDx = 0, bestDy = 0, needsLeader = false;
+    for (let i = 0; i < offsets.length; i++) {
+      const [dx, dy] = offsets[i];
+      const effAlign = dx < 0 ? 'right' : (dx === 0 ? 'center' : 'left');
+      const box = this._bbox(text, anchorX + dx, anchorY + dy, effAlign, font);
+      if (!this._inBounds(box)) continue;
+      let collision = false;
+      for (const p of this.placed) {
+        if (this._overlaps(box, p)) { collision = true; break; }
+      }
+      if (!collision) {
+        bestBox = box;
+        bestDx = dx;
+        bestDy = dy;
+        needsLeader = i >= 8; // farther offsets get leader lines
+        break;
+      }
+    }
+
+    // Fallback: use first offset even if overlapping (better than nothing)
+    if (!bestBox) {
+      bestDx = offsets[0][0];
+      bestDy = offsets[0][1];
+      bestBox = this._bbox(text, anchorX + bestDx, anchorY + bestDy, align, font);
+      needsLeader = false;
+    }
+
+    // Draw leader line if label is far from anchor
+    if (needsLeader) {
+      this.ctx.save();
+      this.ctx.strokeStyle = leaderColor;
+      this.ctx.lineWidth = 0.8;
+      this.ctx.setLineDash([2, 2]);
+      this.ctx.globalAlpha = 0.5;
+      this.ctx.beginPath();
+      this.ctx.moveTo(anchorX, anchorY);
+      this.ctx.lineTo(anchorX + bestDx, anchorY + bestDy);
+      this.ctx.stroke();
+      this.ctx.setLineDash([]);
+      this.ctx.restore();
+    }
+
+    // Draw the label
+    const effAlign = bestDx < 0 ? 'right' : (bestDx === 0 ? 'center' : 'left');
+    this.ctx.fillStyle = color;
+    this.ctx.font = font;
+    this.ctx.textAlign = effAlign;
+    this.ctx.fillText(text, anchorX + bestDx, anchorY + bestDy);
+
+    // Register the placed label
+    this.placed.push(bestBox);
+    this.ctx.restore();
+    return bestBox;
+  }
+}
 ```
 
 ---
@@ -103,6 +239,9 @@ const COLORS = ['#2563eb','#dc2626','#059669','#d97706','#7c3aed','#0891b2'];
     function toX(p) { return pad.left + p * plotW; }
     function toY(v) { return pad.top + (1 - (v - minEU) / (maxEU - minEU)) * plotH; }
 
+    // ── Label collision manager ──
+    const lm = new LabelManager(ctx, { left: pad.left, top: pad.top, right: W - pad.right, bottom: H - pad.bottom });
+
     // Grid
     ctx.strokeStyle = tc.grid; ctx.lineWidth = 0.5;
     for (let i = 0; i <= 4; i++) {
@@ -116,11 +255,15 @@ const COLORS = ['#2563eb','#dc2626','#059669','#d97706','#7c3aed','#0891b2'];
     ctx.moveTo(pad.left, pad.top); ctx.lineTo(pad.left, H - pad.bottom);
     ctx.lineTo(W - pad.right, H - pad.bottom); ctx.stroke();
 
-    // Axis labels
+    // Axis labels (drawn manually, then reserved in LabelManager)
     ctx.fillStyle = tc.text; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('p = Pr(H)', W / 2, H - 8);
     ctx.save(); ctx.translate(14, H / 2); ctx.rotate(-Math.PI / 2);
     ctx.fillText('Expected Utility', 0, 0); ctx.restore();
+
+    // Reserve the title/axis area so labels avoid it
+    lm.reserve(0, 0, W, pad.top);             // top title band
+    lm.reserve(0, H - pad.bottom, W, pad.bottom); // bottom axis band
 
     // N(a) bands on x-axis
     const bandY = H - pad.bottom + 5;
@@ -135,10 +278,10 @@ const COLORS = ['#2563eb','#dc2626','#059669','#d97706','#7c3aed','#0891b2'];
       ctx.moveTo(toX(0), toY(eu(a, 0)));
       ctx.lineTo(toX(1), toY(eu(a, 1)));
       ctx.stroke();
-      // Label
-      ctx.fillStyle = a.color; ctx.font = 'bold 11px Inter';
-      ctx.textAlign = 'left';
-      ctx.fillText(a.name, toX(1) + 4, toY(eu(a, 1)));
+      // Label with collision avoidance
+      lm.place(a.name, toX(1), toY(eu(a, 1)), {
+        font: 'bold 11px Inter', color: a.color
+      });
     }
 
     // Upper envelope (bold)
@@ -503,3 +646,4 @@ When generating a digest, the agent should:
 8. For theory papers, include a Playground section at the end of the digest (Type 8)
 9. All canvases use DPR-aware rendering via `setupCanvas()` (v5)
 10. Region fills use gradient (not flat alpha), dots have `shadowBlur`, hover shows coordinate tooltip (v5)
+11. **Label collision avoidance**: Include the `LabelManager` class once in the digest `<script>`. In every `draw()` function: create a fresh `LabelManager`, `reserve()` title/axis regions, and use `lm.place()` for all data-point labels. Never use raw `ctx.fillText()` for annotations that could overlap other labels or chart elements.

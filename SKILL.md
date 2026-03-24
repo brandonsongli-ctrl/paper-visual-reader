@@ -252,6 +252,7 @@ Place each visualization `<div class="interactive-viz">` immediately after the `
 8. **Fullscreen toggle**: Every viz has ⛶ button. JS: `function toggleFullscreen(id){document.getElementById(id).classList.toggle('fullscreen');...}`.
 9. **Dark mode aware**: Read `document.documentElement.dataset.theme` for colors; re-render on theme change.
 10. **Print-safe**: Use `@media print { .interactive-viz canvas { display:none; } .viz-print-fallback { display:block; } }` with a static summary.
+11. **Label collision avoidance (MANDATORY)**: All text labels on canvas (data point annotations, peak markers, value labels, curve names) MUST use the `LabelManager` class from the General Utilities section of `interactive_viz_catalog.md`. Direct `ctx.fillText()` is only permitted for axis labels and chart titles (which should be registered via `lm.reserve()`). This prevents labels from overlapping each other, chart titles, and curves. Each `draw()` function must: (a) create a fresh `LabelManager` with plot bounds, (b) `reserve()` title and axis regions, (c) use `lm.place()` for all data labels. See the Type 1 example in the catalog for the pattern.
 
 ### Minimum Visualization Count
 
