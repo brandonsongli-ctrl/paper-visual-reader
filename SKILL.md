@@ -2,7 +2,7 @@
 name: "paper-visual-reader"
 description: "Visual-layout paper reader that outputs standalone HTML digests with formula rendering, interactive filters/search, evidence ledger, and strict anti-hallucination gating. Use for visual paper reading, 读论文可视化, structured digest generation, theory-paper decomposition, and comparative mode attribution."
 ---
-# Paper Visual Reader v3
+# Paper Visual Reader v5
 
 Generate standalone HTML visual digests for academic papers with deterministic evidence gating.
 
@@ -285,6 +285,84 @@ Place each visualization `<div class="interactive-viz">` immediately after the `
 
 See `references/interactive_viz_catalog.md` for reusable code templates of each visualization type.
 
+## Cross-Reference Popup System (v5)
+
+Named mathematical objects (Proposition, Theorem, Lemma, Corollary, Assumption, Definition + number) must be clickable references that show floating popup cards with the full statement.
+
+### Build Phase (during comprehension pass)
+
+During the AI comprehension pass, build an **xref registry**: a JS object mapping each named item to its title, statement text (KaTeX source), and anchor ID. Example:
+
+```javascript
+const XREF_REGISTRY = {
+  "Proposition 1": { title: "Proposition 1", body: "For any prior $\\mu_0$, the ...", anchor: "prop-1" },
+  "Theorem 2":     { title: "Theorem 2",     body: "The optimal signal ...",       anchor: "thm-2"  },
+  // ...built from all named items extracted during comprehension
+};
+```
+
+### Render Phase
+
+1. **Auto-scan**: After HTML is assembled, scan all text nodes for patterns matching `(Proposition|Theorem|Lemma|Corollary|Assumption|Definition)\s+\d+(\.\d+)*`. Wrap each match in `<span class="xref-link" data-xref="Proposition 1">Proposition 1</span>`.
+2. **Click handler**: On click, show a floating popup card positioned near the click target.
+3. **Popup structure**:
+   - Title header with blue background (`var(--accent-blue)`)
+   - Statement body rendered with KaTeX
+   - Close button (top-right)
+   - "Scroll to statement" link that smooth-scrolls to the anchor
+4. **Dismiss**: On Escape keypress or click outside the popup.
+5. **Dark mode aware**: Popup colors read from CSS custom properties.
+
+### CSS (include in template `<style>`)
+
+```css
+.xref-link { color: var(--accent-blue); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; }
+.xref-link:hover { text-decoration-style: solid; }
+.xref-popup { position: fixed; z-index: 9500; max-width: 480px; min-width: 280px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.18); overflow: hidden; animation: xref-fade-in 0.15s ease; }
+.xref-popup-header { background: var(--accent-blue); color: white; padding: 10px 16px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+.xref-popup-close { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 0 4px; }
+.xref-popup-body { padding: 16px 20px; font-size: 1rem; line-height: 1.7; color: var(--text-body); max-height: 300px; overflow-y: auto; }
+.xref-popup-footer { padding: 8px 16px; border-top: 1px solid var(--card-border); text-align: right; }
+.xref-popup-footer a { font-family: 'Inter', sans-serif; font-size: 0.78rem; color: var(--accent-blue); text-decoration: none; }
+.xref-popup-footer a:hover { text-decoration: underline; }
+@keyframes xref-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+```
+
+## Inline Proof Blocks (v5)
+
+Proofs MUST appear as collapsible `<details>` blocks **inline** under their proposition, inside the same `.content-card`, immediately after the interpretation box. Proofs MUST NOT be placed in a separate appendix section.
+
+### Structure
+
+```html
+<div class="content-card" data-claim-id="prop-1">
+  <!-- ... proposition statement, interpretation-box ... -->
+  <details class="inline-proof">
+    <summary>Proof of Proposition 1</summary>
+    <div class="details-content">
+      <p><!-- Proof content with KaTeX math --></p>
+    </div>
+  </details>
+</div>
+```
+
+### CSS (include in template `<style>`)
+
+```css
+.inline-proof { background: var(--details-bg); border: 1px solid var(--details-border); border-radius: 8px; margin-top: 16px; }
+.inline-proof summary { font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 600; color: var(--accent-blue); cursor: pointer; padding: 12px 18px; list-style: none; display: flex; align-items: center; gap: 8px; }
+.inline-proof summary::-webkit-details-marker { display: none; }
+.inline-proof summary::before { content: '\25B6'; font-size: 0.6rem; transition: transform 0.2s ease; color: var(--accent-blue); }
+.inline-proof[open] summary::before { transform: rotate(90deg); }
+.inline-proof .details-content { padding: 4px 18px 18px; border-top: 1px solid var(--details-border); }
+.inline-proof .details-content p { font-size: 1rem; margin-top: 12px; line-height: 1.8; }
+```
+
+### Mandate
+
+- The "Extreme Granularity" rules in `references/paper_structure_guide.md` require proofs inline under their proposition as collapsible `<details>` blocks, NOT in a separate appendix.
+- The theory template section structure (`#setup`, `#lemmas`, `#theorems`, `#examples`, `#ledger`) remains, but proofs live inside each result card rather than a separate proofs section.
+
 ## Scripts
 
 - `scripts/source_extractor.py`: extraction and OCR fallback
@@ -330,6 +408,11 @@ See `references/interactive_viz_catalog.md` for reusable code templates of each 
 - [ ] Interactive visualizations meet minimum count for paper type (v4)
 - [ ] Each visualization is self-contained (IIFE), canvas-based, with presets from paper examples
 - [ ] Visualization CSS classes included in template style block
+- [ ] Cross-reference popup system: all named math objects (Proposition/Theorem/Lemma/etc.) are clickable xref-links with popup cards (v5)
+- [ ] Xref registry built from all named items during comprehension pass (v5)
+- [ ] Proofs appear inline as collapsible `<details class="inline-proof">` blocks inside result cards, NOT in a separate appendix (v5)
+- [ ] Playground visualization included for theory papers with click-to-draw and parameter sliders (v5)
+- [ ] Canvas rendering uses DPR scaling, gradient fills, shadow dots, and hover tooltips (v5)
 
 <!-- ANTI_HALLUCINATION_SKILL_PROFILE_V2:paper-visual-reader:7258e1ec1a2f -->
 ## Anti-Hallucination Module: paper-visual-reader

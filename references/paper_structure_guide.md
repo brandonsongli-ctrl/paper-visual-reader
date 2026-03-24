@@ -27,6 +27,9 @@
 - **Conclusion & Broader Impact**: Synthesize what we learned and why this paper matters deeply.
 
 > [!IMPORTANT]
+> **INLINE PROOFS (v5)**: Proofs appear inline under their proposition as collapsible `<details class="inline-proof">` blocks, NOT in a separate appendix section. Each proof lives inside the same `.content-card` as its proposition, immediately after the interpretation box. This keeps the logical flow intact: statement, interpretation, then proof.
+
+> [!IMPORTANT]
 > **EXTREME DEPTH & SUPER-VERBOSITY REQUIRED**: Do NOT just dump the mathematical proposition. You MUST act as an expert economics professor delivering an in-depth, hour-long whiteboard lecture. Short summaries and bullet points for Intuition and Proof Logic are **STRICTLY FORBIDDEN**.
 > 1. **Economic / Mathematical Intuition**: You MUST write a detailed, multi-paragraph (200+ words) explanation wrapping the concept. Explain the real-world friction, the incentives behind the math, and *why* this result matters in plain English.
 > 2. **Proof Logic / Mechanism Sketch**: You MUST walk the reader step-by-step through the mathematical derivation. Do not just "sketch" the idea. Explain the logical chain—how limits are taken, why certain terms drop out, and how exactly equations substitute into one another to yield the final theorem. This should be a robust, multi-paragraph deductive breakdown bridging the gap between assumptions and the final result.

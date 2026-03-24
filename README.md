@@ -1,13 +1,13 @@
 <div align="center">
 
-# Paper Visual Reader v4.0
+# Paper Visual Reader v5.0
 
 **Transform academic papers into interactive, evidence-gated HTML digests that are more informative than the original paper.**
 
 [English](#english) | [中文](#中文) | [Español](#español)
 
-<img src="https://img.shields.io/badge/version-4.0-blue" alt="version">
-<img src="https://img.shields.io/badge/UI-Interactive_v4-orange" alt="ui">
+<img src="https://img.shields.io/badge/version-5.0-blue" alt="version">
+<img src="https://img.shields.io/badge/UI-Interactive_v5-orange" alt="ui">
 <img src="https://img.shields.io/badge/KaTeX-0.16.11-green" alt="katex">
 <img src="https://img.shields.io/badge/license-MIT-yellow" alt="license">
 <img src="https://img.shields.io/badge/templates-5-purple" alt="templates">
@@ -24,7 +24,7 @@
 
 Paper Visual Reader converts PDF/LaTeX academic papers into standalone HTML digests. Unlike summaries, these digests are **technically dense and evidence-gated**, designed to be more informative than reading the original paper by adding intuition, interactive visualizations, and strict factual grounding.
 
-### Core Value Proposition (v4.0)
+### Core Value Proposition (v5.0)
 
 - **Interactive Visualization Module**: Automatically generates Canvas-driven widgets (Belief partitions, Simplex heatmaps, Payoff spaces) to build geometric intuition for formal results.
 - **Evidence Gating & Anti-Hallucination**: Every claim is traced to a specific source anchor. A deterministic "Guard" blocks ungrounded content before delivery.
@@ -81,7 +81,7 @@ graph LR
 
 Paper Visual Reader 将 PDF/LaTeX 学术论文转换为独立的 HTML 可视化摘要。与普通摘要不同，产出的摘要具有**极高的技术密度与证据约束**，旨在通过加入直观解读、交互式可视化和严格的事实溯源，使其比阅读论文原文更有信息量。
 
-### 4.0 版本核心价值
+### 5.0 版本核心价值
 
 - **交互式可视化模块**：自动生成基于 Canvas 的交互小部件（如信念划分、单纯形热力图、支付空间图），建立对形式化结果的几何直觉。
 - **证据分级与反幻觉**：每个论断都追溯到特定的源文锚点。确定性“守卫”在交付前强力拦截无依据的内容。
@@ -131,6 +131,32 @@ La plantilla por defecto presenta un diseno de tres columnas optimizado para pan
 - **Panel derecho** (260px): Estadisticas del articulo, medidor de calidad de evidencia, contribuciones clave, referencia rapida de notacion, indicador dinamico de seccion
 
 El panel derecho se oculta por debajo de 1200px. Por debajo de 768px, el diseno cambia a una sola columna para moviles.
+
+---
+
+## Changelog
+
+### v5.0 (2026-03-24)
+- Cross-reference popup system for named mathematical objects (Proposition, Theorem, Lemma, Corollary, Assumption, Definition)
+- Inline proof blocks (collapsible, under each proposition, not in a separate appendix)
+- Playground visualization type (click-to-draw custom functions, real-time computation, parameter sliders)
+- Enhanced canvas rendering (gradient fills, shadow dots, hover tooltips, DPR-aware scaling)
+
+### v4.0
+- Interactive Visualization Module with 8 viz types
+- Canvas/SVG inline visualizations
+
+### v3.0
+- Premium Academic 3-panel template
+- Anti-hallucination guard (11-round verification)
+- Evidence ledger schema
+
+### v2.0
+- Right margin panel
+- Theory/empirical/review template specialization
+
+### v1.0
+- Initial release with basic HTML digest generation
 
 ---
 

@@ -258,6 +258,237 @@ Simple but effective:
 
 ---
 
+## Type 8: Playground (Click-to-Draw + Real-Time Computation)
+
+**Trigger**: Theory papers where readers benefit from exploring custom functions (e.g., custom value functions, custom distributions, custom cost curves) and seeing real-time mathematical transformations (e.g., concavification, convex hull, optimal mechanism).
+
+A full-featured interactive sandbox at the end of the digest.
+
+### Structure
+
+```html
+<div class="interactive-viz playground-viz" id="viz-playground">
+  <div class="viz-header">
+    <span class="viz-badge">Playground</span>
+    <span class="viz-title">{Description, e.g. "Draw your own v-hat and see the concavification"}</span>
+    <button class="viz-fullscreen-btn" onclick="toggleFullscreen('viz-playground')">&#x26F6;</button>
+  </div>
+  <div class="viz-body">
+    <canvas id="canvas-playground" width="800" height="450"></canvas>
+  </div>
+  <div class="viz-controls">
+    <button class="active" onclick="loadPreset(0)">Paper Example 1</button>
+    <button onclick="loadPreset(1)">Paper Example 2</button>
+    <button onclick="clearCanvas()">Clear &amp; Draw</button>
+    <label>Parameter: <input type="range" min="0" max="100" value="50" oninput="updateParam(this.value)"></label>
+  </div>
+  <div class="viz-caption"><p>Click on the canvas to place control points. The transformation updates in real time.</p></div>
+</div>
+```
+
+### Key Features
+
+1. **Click-to-draw**: Users click on the canvas to place control points defining a custom function. Points are interpolated (linear or cubic spline) to form a curve.
+2. **Real-time transformation**: As soon as the user draws, the mathematical transformation (concavification, convex hull, optimal mechanism, etc.) is computed and rendered as an overlay curve.
+3. **Preset buttons**: 2-3 presets that load specific functions from the paper's examples. First preset loads by default so the canvas is never empty.
+4. **Parameter sliders**: Adjust model parameters (e.g., prior, cost, discount factor) that affect the transformation but not the drawn function.
+5. **Clear and redraw**: A button to clear user-drawn points and start fresh.
+
+### Implementation Pattern
+
+```javascript
+(function() {
+  const canvas = document.getElementById('canvas-playground');
+  const ctx = canvas.getContext('2d');
+  let userPoints = [];  // [{x, y}, ...] user-clicked control points
+  let paramValue = 0.5;
+
+  // Presets: arrays of {x, y} matching paper examples
+  const presets = [
+    [ {x:0, y:0.2}, {x:0.3, y:0.8}, {x:0.6, y:0.3}, {x:1, y:0.9} ],
+    [ {x:0, y:0.5}, {x:0.5, y:0.1}, {x:1, y:0.7} ],
+  ];
+
+  function loadPreset(i) {
+    userPoints = [...presets[i]];
+    draw();
+  }
+
+  function clearCanvas() {
+    userPoints = [];
+    draw();
+  }
+
+  function updateParam(v) {
+    paramValue = v / 100;
+    draw();
+  }
+
+  // Compute transformation (paper-specific, e.g., concavification)
+  function computeTransformation(pts) {
+    // ... paper-specific math
+    return transformedPts;
+  }
+
+  function draw() {
+    // DPR-aware sizing
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const W = rect.width, H = rect.height;
+    const tc = getThemeColors();
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = tc.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw user function
+    if (userPoints.length >= 2) {
+      ctx.strokeStyle = COLORS[0]; ctx.lineWidth = 2;
+      ctx.beginPath();
+      userPoints.sort((a, b) => a.x - b.x);
+      for (let i = 0; i < userPoints.length; i++) {
+        const px = userPoints[i].x * W, py = (1 - userPoints[i].y) * H;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Draw transformation overlay
+      const transformed = computeTransformation(userPoints);
+      ctx.strokeStyle = COLORS[1]; ctx.lineWidth = 2.5;
+      ctx.setLineDash([6, 3]);
+      ctx.beginPath();
+      for (let i = 0; i < transformed.length; i++) {
+        const px = transformed[i].x * W, py = (1 - transformed[i].y) * H;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Draw control points with shadow
+    for (const pt of userPoints) {
+      const px = pt.x * W, py = (1 - pt.y) * H;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.25)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetY = 1;
+      ctx.fillStyle = COLORS[0];
+      ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = 1 - (e.clientY - rect.top) / rect.height;
+    userPoints.push({x, y});
+    draw();
+  });
+
+  // Load first preset by default
+  loadPreset(0);
+})();
+```
+
+### CSS Addition
+
+```css
+.playground-viz { border: 2px solid var(--accent-blue-border); }
+.playground-viz .viz-header { background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-border)); }
+```
+
+---
+
+## Enhanced Canvas Rendering (v5)
+
+All canvas-based visualizations SHOULD incorporate these rendering enhancements for a polished, modern appearance.
+
+### DPR-Aware Rendering
+
+All canvases must scale for high-DPI displays:
+
+```javascript
+function setupCanvas(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx, W: rect.width, H: rect.height };
+}
+```
+
+### Gradient Fills for Regions
+
+Use gradient fills (not flat alpha) for shaded regions between curves:
+
+```javascript
+function fillRegionGradient(ctx, topY, bottomY, x0, x1, color, W) {
+  const grad = ctx.createLinearGradient(0, topY, 0, bottomY);
+  grad.addColorStop(0, color + '40');  // 25% alpha at top
+  grad.addColorStop(1, color + '08');  // 3% alpha at bottom
+  ctx.fillStyle = grad;
+  // ... fill path between curves
+}
+```
+
+### Dot Rendering with Shadows
+
+Data points and control points should have subtle drop shadows:
+
+```javascript
+function drawDot(ctx, x, y, radius, color) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.25)';
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 1;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+```
+
+### Canvas Hover Tooltips
+
+Show a floating `<div>` with coordinate values on mousemove:
+
+```javascript
+// Create tooltip div (once per viz)
+const tooltip = document.createElement('div');
+tooltip.className = 'canvas-tooltip';
+tooltip.style.cssText = 'position:absolute;display:none;pointer-events:none;' +
+  'background:var(--card-bg);border:1px solid var(--card-border);border-radius:6px;' +
+  'padding:6px 10px;font-family:Inter,sans-serif;font-size:0.75rem;' +
+  'color:var(--text-body);box-shadow:0 2px 8px rgba(0,0,0,0.12);z-index:100;white-space:nowrap;';
+canvas.parentElement.style.position = 'relative';
+canvas.parentElement.appendChild(tooltip);
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  // Convert to data coordinates
+  const dataX = /* ... */, dataY = /* ... */;
+  tooltip.style.display = 'block';
+  tooltip.style.left = (mx + 12) + 'px';
+  tooltip.style.top = (my - 8) + 'px';
+  tooltip.innerHTML = `<b>x</b>: ${dataX.toFixed(3)}, <b>y</b>: ${dataY.toFixed(3)}`;
+});
+
+canvas.addEventListener('mouseleave', () => {
+  tooltip.style.display = 'none';
+});
+```
+
+---
+
 ## Integration Checklist
 
 When generating a digest, the agent should:
@@ -269,3 +500,6 @@ When generating a digest, the agent should:
 5. Embed the `<div class="interactive-viz">` + `<script>` after the result card
 6. Include the viz CSS classes and `toggleFullscreen()` function once in the document head
 7. Test mentally that the visualization correctly represents the mathematical content
+8. For theory papers, include a Playground section at the end of the digest (Type 8)
+9. All canvases use DPR-aware rendering via `setupCanvas()` (v5)
+10. Region fills use gradient (not flat alpha), dots have `shadowBlur`, hover shows coordinate tooltip (v5)
