@@ -134,29 +134,83 @@ El panel derecho se oculta por debajo de 1200px. Por debajo de 768px, el diseno 
 
 ---
 
-## Changelog
+## Changelog / 更新日志 / Historial de cambios
 
 ### v5.0 (2026-03-24)
+
+**English:**
 - Cross-reference popup system for named mathematical objects (Proposition, Theorem, Lemma, Corollary, Assumption, Definition)
 - Inline proof blocks (collapsible, under each proposition, not in a separate appendix)
 - Playground visualization type (click-to-draw custom functions, real-time computation, parameter sliders)
 - Enhanced canvas rendering (gradient fills, shadow dots, hover tooltips, DPR-aware scaling)
 
+**中文：**
+- 交叉引用弹窗系统：点击命题/定理/引理/推论/假设/定义编号，弹出浮动卡片显示完整声明（支持 KaTeX 渲染）
+- 内联证明块：可折叠的证明直接嵌入对应命题的卡片内部，不再放在独立附录中
+- Playground 可视化类型：点击绘制自定义函数，实时计算变换（如 concavification），参数滑块调节
+- Canvas 渲染增强：渐变填充、阴影圆点、悬停坐标提示、DPR 缩放适配
+
+**Espanol:**
+- Sistema de popups de referencias cruzadas para objetos matematicos (Proposicion, Teorema, Lema, Corolario, Supuesto, Definicion)
+- Bloques de prueba en linea (colapsables, bajo cada proposicion, no en un apendice separado)
+- Tipo de visualizacion Playground (dibujar funciones personalizadas, computacion en tiempo real, controles deslizantes)
+- Renderizado de canvas mejorado (rellenos degradados, puntos con sombra, tooltips al pasar el cursor, escalado DPR)
+
 ### v4.0
+
+**English:**
 - Interactive Visualization Module with 8 viz types
 - Canvas/SVG inline visualizations
 
+**中文：**
+- 交互可视化模块，含 8 种可视化类型
+- Canvas/SVG 内联可视化
+
+**Espanol:**
+- Modulo de visualizacion interactiva con 8 tipos
+- Visualizaciones en linea Canvas/SVG
+
 ### v3.0
+
+**English:**
 - Premium Academic 3-panel template
 - Anti-hallucination guard (11-round verification)
 - Evidence ledger schema
 
+**中文：**
+- Premium Academic 三栏模板
+- 反幻觉守卫（11 轮验证）
+- 证据台账 schema
+
+**Espanol:**
+- Plantilla academica Premium de 3 paneles
+- Guardia anti-alucinacion (verificacion de 11 rondas)
+- Esquema de libro de evidencia
+
 ### v2.0
+
+**English:**
 - Right margin panel
 - Theory/empirical/review template specialization
 
+**中文：**
+- 右侧边栏面板
+- 理论/实证/综述模板特化
+
+**Espanol:**
+- Panel de margen derecho
+- Especializacion de plantillas teoria/empirica/revision
+
 ### v1.0
+
+**English:**
 - Initial release with basic HTML digest generation
+
+**中文：**
+- 初始版本，基础 HTML 摘要生成
+
+**Espanol:**
+- Version inicial con generacion basica de resumen HTML
 
 ---
 
