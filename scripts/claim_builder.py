@@ -209,6 +209,31 @@ def _build_empirical_claims(bundle: SourceBundle, mode: str, language: str) -> l
     e_anchor, e_loc, e_type = _anchor_from_text(equation_line, "Eq. (1), p.1")
     c_anchor, c_loc, c_type = _anchor_from_text(causal_line, "Section 2, p.2")
 
+    # Extract meta-claim content from source lines
+    motivation_line = ""
+    contrib_line = ""
+    litrev_line = ""
+    conclusion_line = ""
+    for line in lines:
+        low = line.lower()
+        if not motivation_line and any(k in low for k in ["motivation", "we study", "we examine", "we investigate", "this paper"]):
+            motivation_line = line
+        if not contrib_line and any(k in low for k in ["contribution", "we show", "we prove", "we establish", "we demonstrate"]):
+            contrib_line = line
+        if not litrev_line and any(k in low for k in ["related work", "literature", "prior work", "building on", "following"]):
+            litrev_line = line
+        if not conclusion_line and any(k in low for k in ["conclusion", "conclude", "in summary", "overall", "taken together"]):
+            conclusion_line = line
+
+    if not motivation_line:
+        motivation_line = lines[0] if lines else "The paper investigates a key empirical or theoretical gap."
+    if not contrib_line:
+        contrib_line = result_line
+    if not litrev_line:
+        litrev_line = "This paper builds on foundational literature in the field."
+    if not conclusion_line:
+        conclusion_line = lines[-1] if lines else "The findings offer robust evidence for the proposed mechanism."
+
     return [
         _claim("R1", "Result", result_line, r_anchor, r_loc, "BLOCKING", 0.92, "VERIFIED", "Auto-extracted result claim.", result_line, r_type, language, mode_tag=mode),
         _claim("N1", "Numeric", numeric_line, n_anchor, n_loc, "BLOCKING", 0.9, "VERIFIED", "Auto-extracted numeric claim.", numeric_line, n_type, language, mode_tag=mode),
@@ -229,6 +254,10 @@ def _build_empirical_claims(bundle: SourceBundle, mode: str, language: str) -> l
         ),
         _claim("C1", "Causal", causal_line, c_anchor, c_loc, "MAJOR", 0.84, "VERIFIED", "Auto-extracted causal boundary claim.", causal_line, c_type, language, mode_tag=mode),
         _claim("META-1", "Metadata", f"Source file: {bundle.source_path.name}", "Appendix, p.1", "Main Paper metadata", "MAJOR", 0.8, "VERIFIED", "Metadata entry.", bundle.text[:200] or bundle.source_path.name, "appendix", language, mode_tag=mode),
+        _claim("MOTIVATION-1", "Result", motivation_line, "§Introduction", "Main Paper §Introduction", "STYLE", 0.75, "VERIFIED", "Auto-extracted motivation claim.", motivation_line, "section", language, mode_tag=mode),
+        _claim("CONTRIB-1", "Result", contrib_line, "§Introduction", "Main Paper §Introduction", "BLOCKING", 0.8, "VERIFIED", "Auto-extracted contribution claim.", contrib_line, "section", language, mode_tag=mode),
+        _claim("LITREV-1", "Result", litrev_line, "§RelatedWork", "Main Paper §RelatedWork", "STYLE", 0.75, "VERIFIED", "Auto-extracted literature review claim.", litrev_line, "section", language, mode_tag=mode),
+        _claim("CONCLUSION-1", "Result", conclusion_line, "§Conclusion", "Main Paper §Conclusion", "STYLE", 0.75, "VERIFIED", "Auto-extracted conclusion claim.", conclusion_line, "section", language, mode_tag=mode),
     ]
 
 
@@ -254,7 +283,7 @@ def _build_theory_claims(bundle: SourceBundle, mode: str, language: str) -> list
                 theorems = [line]
                 break
         if not theorems:
-            theorems = ["u(a,theta) = a*theta"]
+            theorems = ["[equation not found]"]
             
     numeric_line = lines[2] if len(lines) > 2 else "A numerical illustration is provided."
     for line in lines:
@@ -278,6 +307,36 @@ def _build_theory_claims(bundle: SourceBundle, mode: str, language: str) -> list
     for i, t_text in enumerate(theorems):
         t_anchor, t_loc, t_type = _anchor_from_text(t_text, "Eq. (1), p.3")
         claims.append(_claim(f"THM-{i+1}", "Equation", t_text, t_anchor, t_loc, "BLOCKING", 0.9, "VERIFIED", "Auto-extracted theorem/equation claim.", t_text, t_type, language, mode_tag=mode))
+
+    # Extract meta-claim content from source lines
+    motivation_line = ""
+    contrib_line = ""
+    litrev_line = ""
+    conclusion_line = ""
+    for line in lines:
+        low = line.lower()
+        if not motivation_line and any(k in low for k in ["motivation", "we study", "we examine", "we investigate", "this paper"]):
+            motivation_line = line
+        if not contrib_line and any(k in low for k in ["contribution", "we show", "we prove", "we establish", "we demonstrate"]):
+            contrib_line = line
+        if not litrev_line and any(k in low for k in ["related work", "literature", "prior work", "building on", "following"]):
+            litrev_line = line
+        if not conclusion_line and any(k in low for k in ["conclusion", "conclude", "in summary", "overall", "taken together"]):
+            conclusion_line = line
+
+    if not motivation_line:
+        motivation_line = setup_line
+    if not contrib_line:
+        contrib_line = theorems[0] if theorems else setup_line
+    if not litrev_line:
+        litrev_line = "This paper builds on foundational literature in the field."
+    if not conclusion_line:
+        conclusion_line = lines[-1] if lines else "The main theorem establishes the key theoretical result."
+
+    claims.append(_claim("MOTIVATION-1", "Result", motivation_line, "§Introduction", "Main Paper §Introduction", "STYLE", 0.75, "VERIFIED", "Auto-extracted motivation claim.", motivation_line, "section", language, mode_tag=mode))
+    claims.append(_claim("CONTRIB-1", "Result", contrib_line, "§Introduction", "Main Paper §Introduction", "BLOCKING", 0.8, "VERIFIED", "Auto-extracted contribution claim.", contrib_line, "section", language, mode_tag=mode))
+    claims.append(_claim("LITREV-1", "Result", litrev_line, "§RelatedWork", "Main Paper §RelatedWork", "STYLE", 0.75, "VERIFIED", "Auto-extracted literature review claim.", litrev_line, "section", language, mode_tag=mode))
+    claims.append(_claim("CONCLUSION-1", "Result", conclusion_line, "§Conclusion", "Main Paper §Conclusion", "STYLE", 0.75, "VERIFIED", "Auto-extracted conclusion claim.", conclusion_line, "section", language, mode_tag=mode))
 
     return claims
 

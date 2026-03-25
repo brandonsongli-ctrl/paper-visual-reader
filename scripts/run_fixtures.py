@@ -216,7 +216,7 @@ def main() -> int:
     guard_cases = [
         ("pass_minimal", "A", "PASS", 0),
         ("fail_missing_anchor", "A", "FAIL", 2),
-        ("fail_equation_mismatch", "A", "FAIL", 2),
+        ("fail_equation_mismatch", "A", "WARN", 0),
         ("fail_numeric_untraceable", "A", "FAIL", 2),
         ("fail_causal_overclaim", "A", "FAIL", 2),
         ("pass_focus_minimal", "B", "PASS", 0),

@@ -409,9 +409,9 @@ def add_finding(
 
 
 def aggregate_status(findings: list[Finding]) -> str:
-    has_fail = any(f.status == "FAIL" and f.severity in {"BLOCKING", "MAJOR"} for f in findings)
-    if has_fail:
-        return "FAIL"
+    for f in findings:
+        if f.status == "FAIL":
+            return "FAIL"
     has_warn = any(f.status in {"WARN", "FAIL"} and f.severity in {"BLOCKING", "MAJOR", "MINOR"} for f in findings)
     if has_warn:
         return "WARN"
@@ -948,20 +948,22 @@ def main() -> int:
             li_text_clean = re.sub(r'\$\$?', '', li_text)
             li_lower = li_text_clean.lower()
             
-            # We strictly forbid structural math words in the notation glossary to prevent LLM topological hallucinations and enforce plain-English accessible definitions.
-            forbidden_notation_keywords = ["set ", "space", "matrix", "vector"]
-            
+            # We forbid vague structural math words in the notation glossary only when used without mathematical context.
+            # If the li item contains math mode markers (\(, \), $, =), it is a legitimate math definition and is exempt.
+            forbidden_notation_keywords = ["set {", "arbitrary set", "some space", "some matrix"]
+            has_math_context = any(marker in li_text for marker in ["\\(", "\\)", "$", "="])
+
             for keyword in forbidden_notation_keywords:
-                if keyword in li_lower:
+                if keyword in li_lower and not has_math_context:
                     add_finding(
-                        findings, 
-                        "R10", 
-                        "notation_grounding", 
-                        "BLOCKING", 
-                        "FAIL", 
-                        claim_id, 
-                        "R10-NOTATION-STRUCTURAL-HALLUCINATION", 
-                        f"Structural math terms (set, space, matrix, vector) are strictly forbidden in the Notation Glossary to force plain-English definitions. Found forbidden keyword: '{keyword}' in '{li_text_clean.strip()}'"
+                        findings,
+                        "R10",
+                        "notation_grounding",
+                        "BLOCKING",
+                        "FAIL",
+                        claim_id,
+                        "R10-NOTATION-STRUCTURAL-HALLUCINATION",
+                        f"Vague structural math terms are forbidden in the Notation Glossary without mathematical context. Found forbidden keyword: '{keyword}' in '{li_text_clean.strip()}'"
                     )
 
     # Round 11: LaTeX Rendering Sanity Check
