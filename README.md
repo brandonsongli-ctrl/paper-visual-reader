@@ -73,6 +73,31 @@ graph LR
 
 ---
 
+## Anti-Hallucination Guard
+
+Every digest passes through a 15-round deterministic verification protocol before delivery. Rounds 1-12 cover structural integrity, evidence-ledger completeness, claim grounding, and per-claim semantic content checks. Rounds 13-15 are the semantic purity layer added in v5.1.
+
+### Semantic Purity Checks (v5.1+)
+
+Three new rounds added to prevent garbage digests that pass structural checks:
+
+**Round 13: Raw Text Injection Detection**
+- Measures fraction of 15-gram windows in digest that exactly match source text
+- WARN at >40% overlap, FAIL at >65%
+- Detects the "source dump" attack: pasting extracted paper text directly into HTML
+
+**Round 14: Interpretation Density**
+- Checks that `.interpretation-box`/`.analysis-box`/`.intuition` elements contain >=15% of total digest words
+- Per-card check: result cards >=80 words must have at least one interpretation child
+- Exempts digests that never use this CSS convention (legacy-safe)
+
+**Round 15: Vocabulary Diversity**
+- Computes type-token ratio (unique words / total words)
+- WARN at TTR <0.20, FAIL at TTR <0.12
+- Detects padding via low-quality word repetition
+
+---
+
 <a name="中文"></a>
 
 ## 中文 (Chinese)

@@ -417,6 +417,9 @@ Proofs MUST appear as collapsible `<details>` blocks **inline** under their prop
 - [ ] Math rendering QA: all `\begin{cases/align/equation/array}` blocks wrapped in `\[...\]` or `\(...\)` or `$$...$$` delimiters; grep `\\begin{` and verify each has enclosing math delimiters (v5.1)
 - [ ] Canvas sizing QA: all `setupCanvas` functions lock CSS display size (`c.style.width/height`) BEFORE setting internal DPR resolution (`c.width = rect.width * dpr`); canvas HTML dimensions coordinated with container `max-width` (v5.1)
 - [ ] No `height: auto` on canvas elements without explicit `c.style.height` lock in JS (v5.1)
+- [ ] R13 raw-text-injection check: PASS (<=40% 15-gram overlap with source)
+- [ ] R14 interpretation-density check: PASS (interpretation boxes >=15% of digest words)
+- [ ] R15 vocabulary-diversity check: PASS (TTR >=0.20)
 
 <!-- ANTI_HALLUCINATION_SKILL_PROFILE_V2:paper-visual-reader:7258e1ec1a2f -->
 ## Anti-Hallucination Module: paper-visual-reader
