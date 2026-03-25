@@ -36,6 +36,40 @@ ALLOWED_STATUSES = {"VERIFIED", "UNVERIFIED", "UNREADABLE", "SPECULATIVE"}
 EQ_PASS_THRESHOLD = 0.30
 EQ_WARN_THRESHOLD = 0.15
 
+# Round 12: Semantic Content Grounding thresholds
+TOKEN_OVERLAP_PASS = 0.45  # fraction of claim content tokens found in source
+TOKEN_OVERLAP_WARN = 0.30
+NGRAM_GROUNDING_PASS = 0.25  # fraction of claim 4-grams found in source
+NGRAM_GROUNDING_WARN = 0.12
+SENTENCE_SIM_FLOOR = 0.35  # min best-match similarity for any sentence
+MIN_CLAIM_TOKENS_FOR_SEMANTIC = 15  # skip semantic check for very short claims
+
+# Round 13: Bulk Duplication thresholds
+DUPLICATION_TOKEN_THRESHOLD = 0.60  # flag if >60% tokens shared between claims
+MIN_CLAIM_TOKENS_FOR_DEDUP = 20
+
+# Round 14: Content Density thresholds
+FILLER_STOPWORD_RATIO_MAX = 0.70  # flag if >70% of tokens are stopwords
+UNIQUE_TOKEN_RATIO_MIN = 0.25  # flag if <25% of tokens are unique
+MIN_CLAIM_TOKENS_FOR_DENSITY = 20
+
+# Stopwords for semantic checks (academic English, compact set)
+STOPWORDS = frozenset({
+    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
+    "being", "have", "has", "had", "do", "does", "did", "will", "would",
+    "shall", "should", "may", "might", "can", "could", "must", "that",
+    "which", "who", "whom", "this", "these", "those", "it", "its", "as",
+    "if", "then", "than", "so", "not", "no", "nor", "each", "every",
+    "all", "any", "both", "such", "into", "over", "under", "also",
+    "about", "up", "out", "just", "only", "very", "more", "most", "other",
+    "some", "when", "where", "how", "what", "there", "here", "between",
+    "through", "during", "before", "after", "above", "below", "because",
+    "while", "since", "until", "although", "however", "therefore", "thus",
+    "hence", "given", "let", "we", "our", "us", "i", "my", "me", "they",
+    "their", "them", "he", "she", "his", "her", "one", "two", "first",
+})
+
 STRONG_CAUSAL_VERBS = {
     "prove",
     "proves",
@@ -414,6 +448,35 @@ def add_finding(
             source_span=source_span,
         )
     )
+
+
+def tokenize_content(text: str) -> list[str]:
+    """Tokenize text into lowercase word tokens, stripping LaTeX and HTML."""
+    cleaned = re.sub(r"\\[a-zA-Z]+\*?(?:\{[^}]*\})?", " ", text)  # strip LaTeX commands
+    cleaned = re.sub(r"<[^>]+>", " ", cleaned)  # strip HTML tags
+    cleaned = re.sub(r"\$\$?[^$]*\$\$?", " ", cleaned)  # strip math blocks
+    cleaned = re.sub(r"[^a-zA-Z0-9\s]", " ", cleaned)
+    return [w.lower() for w in cleaned.split() if len(w) >= 2]
+
+
+def content_tokens(text: str) -> list[str]:
+    """Tokenize and remove stopwords."""
+    return [t for t in tokenize_content(text) if t not in STOPWORDS]
+
+
+def build_ngrams(tokens: list[str], n: int = 4) -> list[tuple[str, ...]]:
+    """Build n-grams from a token list."""
+    if len(tokens) < n:
+        return []
+    return [tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1)]
+
+
+def split_sentences(text: str) -> list[str]:
+    """Split text into sentences (rough heuristic)."""
+    cleaned = re.sub(r"<[^>]+>", " ", text)
+    cleaned = re.sub(r"\$\$?[^$]*\$\$?", " ", cleaned)
+    sents = re.split(r"(?<=[.!?])\s+", cleaned.strip())
+    return [s.strip() for s in sents if len(s.strip()) > 20]
 
 
 def aggregate_status(findings: list[Finding]) -> str:
@@ -1027,7 +1090,125 @@ def main() -> int:
             f"Odd number of single $ delimiters ({single_dollars}), likely unmatched math delimiter"
         )
 
-    # Round 12: (reserved — unreadable policy follows)
+    # Round 12: Per-claim Semantic Content Grounding
+    # For each claim, verify that its text content is genuinely grounded in the
+    # source paper, not filler/fabricated text that happens to have correct HTML
+    # attributes.  Three sub-checks:
+    #   (a) Token overlap ratio — content words in claim vs source
+    #   (b) N-gram grounding — 4-gram windows from claim found in source
+    #   (c) Sentence similarity floor — every sentence has a reasonable match
+    # Uses ledger claim_text as primary (stripped of template chrome); falls back
+    # to digest HTML text only when ledger text is empty.
+    source_content_tokens_set = set(content_tokens(source_text))
+    source_ngram_set: set[tuple[str, ...]] = set(build_ngrams(content_tokens(source_text), 4))
+
+    # Template boilerplate patterns to strip before semantic analysis
+    _template_noise = re.compile(
+        r"(?:claim_id|data-claim-id|loc|source_location)\s*=\s*\S+|"
+        r"(?:Notation Glossary|Key Foundation|Estimation Equation|Evidence Ledger)\b|"
+        r"(?:EN|ZH|CN)\s*:|"
+        r"(?:Paper [A-Z])\s*[§:]\s*\d+",
+        flags=re.IGNORECASE,
+    )
+
+    def _clean_for_semantic(text: str) -> str:
+        """Strip template chrome and metadata before semantic tokenization."""
+        cleaned = _template_noise.sub(" ", text)
+        # Strip anchor-like fragments
+        cleaned = re.sub(r"§\s*\d+|p\.\s*\d+|Section\s+\d+", " ", cleaned, flags=re.IGNORECASE)
+        return normalize_whitespace(cleaned)
+
+    for claim in ledger_claims:
+        claim_id = str(claim["claim_id"])
+        claim_class = str(claim["claim_class"])
+
+        # Skip metadata and speculation — not grounded the same way
+        if claim_class in {"Metadata", "Speculation"}:
+            continue
+
+        # Prefer ledger claim_text (substantive content, no template chrome);
+        # fall back to digest HTML text only if ledger is empty
+        ledger_text = str(claim.get("claim_text", "")).strip()
+        digest_text = str(digest_map.get(claim_id, {}).get("text", ""))
+        raw_text = ledger_text if ledger_text else digest_text.strip()
+        clean_text = _clean_for_semantic(raw_text)
+
+        claim_ctokens = content_tokens(clean_text)
+        if len(claim_ctokens) < MIN_CLAIM_TOKENS_FOR_SEMANTIC:
+            continue
+
+        # (a) Token overlap ratio
+        overlap_count = sum(1 for t in claim_ctokens if t in source_content_tokens_set)
+        token_overlap = overlap_count / len(claim_ctokens)
+
+        if token_overlap < TOKEN_OVERLAP_WARN:
+            sev = "BLOCKING" if claim_class in TIER_A_CLASSES else "MAJOR"
+            add_finding(
+                findings, "R12", "semantic_grounding", sev, "FAIL", claim_id,
+                "R12-TOKEN-OVERLAP-FAIL",
+                f"Token overlap with source is {token_overlap:.1%} (threshold: {TOKEN_OVERLAP_WARN:.0%}). "
+                f"Claim content may not be grounded in source text.",
+            )
+        elif token_overlap < TOKEN_OVERLAP_PASS:
+            add_finding(
+                findings, "R12", "semantic_grounding", "MINOR", "WARN", claim_id,
+                "R12-TOKEN-OVERLAP-WARN",
+                f"Token overlap with source is {token_overlap:.1%} (pass: {TOKEN_OVERLAP_PASS:.0%}). "
+                f"Some content words not found in source.",
+            )
+
+        # (b) N-gram grounding score
+        claim_ngrams = build_ngrams(claim_ctokens, 4)
+        if claim_ngrams:
+            ngram_hits = sum(1 for ng in claim_ngrams if ng in source_ngram_set)
+            ngram_score = ngram_hits / len(claim_ngrams)
+
+            if ngram_score < NGRAM_GROUNDING_WARN:
+                sev = "BLOCKING" if claim_class in TIER_A_CLASSES else "MAJOR"
+                add_finding(
+                    findings, "R12", "ngram_grounding", sev, "FAIL", claim_id,
+                    "R12-NGRAM-FAIL",
+                    f"4-gram grounding score {ngram_score:.1%} (threshold: {NGRAM_GROUNDING_WARN:.0%}). "
+                    f"Claim phrasing diverges significantly from source.",
+                )
+            elif ngram_score < NGRAM_GROUNDING_PASS:
+                add_finding(
+                    findings, "R12", "ngram_grounding", "MINOR", "WARN", claim_id,
+                    "R12-NGRAM-WARN",
+                    f"4-gram grounding score {ngram_score:.1%} (pass: {NGRAM_GROUNDING_PASS:.0%}). "
+                    f"Some phrasing not closely aligned with source.",
+                )
+
+        # (c) Sentence similarity floor (supplementary — MINOR severity only,
+        # since legitimate paraphrasing and interpretation naturally diverge)
+        claim_sentences = split_sentences(clean_text)
+        if claim_sentences:
+            source_sentences = split_sentences(source_text)
+            if source_sentences:
+                ungrounded_count = 0
+                for sent in claim_sentences:
+                    sent_norm = normalize_whitespace(sent).lower()
+                    if len(sent_norm) < 30:
+                        continue
+                    best_sim = 0.0
+                    for src_sent in source_sentences:
+                        src_norm = normalize_whitespace(src_sent).lower()
+                        sim = similarity(sent_norm, src_norm)
+                        if sim > best_sim:
+                            best_sim = sim
+                        if best_sim > SENTENCE_SIM_FLOOR:
+                            break  # fast exit once floor is met
+                    if best_sim < SENTENCE_SIM_FLOOR:
+                        ungrounded_count += 1
+                # Only flag if majority of claim sentences are ungrounded
+                total_checked = len([s for s in claim_sentences if len(normalize_whitespace(s)) >= 30])
+                if total_checked > 0 and ungrounded_count > total_checked * 0.5:
+                    add_finding(
+                        findings, "R12", "sentence_grounding", "MINOR", "WARN", claim_id,
+                        "R12-SENTENCE-UNGROUNDED",
+                        f"{ungrounded_count}/{total_checked} sentences below similarity floor "
+                        f"({SENTENCE_SIM_FLOOR}). Claim may contain substantial ungrounded content.",
+                    )
 
     # Round 13: Raw text injection detection
     # Detect when large contiguous blocks from the source are pasted directly

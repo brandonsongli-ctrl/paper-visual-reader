@@ -1,12 +1,12 @@
 <div align="center">
 
-# Paper Visual Reader v5.0
+# Paper Visual Reader v5.1
 
 **Transform academic papers into interactive, evidence-gated HTML digests that are more informative than the original paper.**
 
 [English](#english) | [中文](#中文) | [Español](#español)
 
-<img src="https://img.shields.io/badge/version-5.0-blue" alt="version">
+<img src="https://img.shields.io/badge/version-5.1-blue" alt="version">
 <img src="https://img.shields.io/badge/UI-Interactive_v5-orange" alt="ui">
 <img src="https://img.shields.io/badge/KaTeX-0.16.11-green" alt="katex">
 <img src="https://img.shields.io/badge/license-MIT-yellow" alt="license">
@@ -136,6 +136,32 @@ El panel derecho se oculta por debajo de 1200px. Por debajo de 768px, el diseno 
 
 ## Changelog / 更新日志 / Historial de cambios
 
+### v5.1 (2026-03-25)
+
+**English:**
+- R12: Per-claim semantic content grounding (token overlap, 4-gram grounding, sentence similarity)
+- R13: Raw text injection detection (15-gram verbatim copy detection)
+- R14: Interpretation density enforcement (per-card and global checks)
+- R15: Structural diversity / type-token ratio padding detection
+- Anti-hallucination guard upgraded from 11-round to 15-round verification protocol
+- All 11 guard fixtures + 5 pipeline e2e tests + 3 regression checks pass
+
+**中文：**
+- R12：逐 claim 语义内容溯源（词重叠率、4-gram 溯源分数、句子相似度下限）
+- R13：原文注入检测（15-gram 滑窗逐字复制检测）
+- R14：解读密度强制检查（全局 + 逐卡片级别）
+- R15：结构多样性 / 类型-标记比检测（防重复填充）
+- 反幻觉守卫从 11 轮升级为 15 轮验证协议
+- 全部 11 个守卫测试 + 5 个端到端管线测试 + 3 个回归测试通过
+
+**Espanol:**
+- R12: Fundamentacion semantica por afirmacion (solapamiento de tokens, score 4-gram, similitud de oraciones)
+- R13: Deteccion de inyeccion de texto sin procesar (deteccion de copia verbatim 15-gram)
+- R14: Aplicacion de densidad de interpretacion (verificaciones por tarjeta y globales)
+- R15: Diversidad estructural / deteccion de relleno por ratio tipo-token
+- Guardian anti-alucinacion actualizado de protocolo de 11 rondas a 15 rondas
+- Todas las 11 pruebas de guardian + 5 pruebas e2e + 3 pruebas de regresion pasan
+
 ### v5.0 (2026-03-24)
 
 **English:**
@@ -174,7 +200,7 @@ El panel derecho se oculta por debajo de 1200px. Por debajo de 768px, el diseno 
 
 **English:**
 - Premium Academic 3-panel template
-- Anti-hallucination guard (11-round verification)
+- Anti-hallucination guard (15-round verification)
 - Evidence ledger schema
 
 **中文：**

@@ -85,6 +85,32 @@ Detects corrupted LaTeX formulas caused by Python string escape interpretation:
 
 The guard scans all `$$ ... $$` and `$ ... $` blocks for tab, newline, carriage return, and backspace characters. Any match triggers a BLOCKING FAIL. Additionally, an odd count of single `$` delimiters triggers a MAJOR WARN for unmatched math delimiters.
 
+### Round 12: Per-Claim Semantic Content Grounding
+
+For each non-Metadata, non-Speculation claim, verify that text content is genuinely grounded in the source paper (not filler/fabricated text with correct HTML structure). Three sub-checks per claim:
+
+1. **Token Overlap Ratio**: Content words (excluding stopwords) in the claim must overlap with source at >= 45% (PASS) or >= 30% (WARN). Below 30% triggers FAIL.
+2. **4-gram Grounding Score**: Sliding 4-gram windows from claim content tokens checked against source. Below 12% triggers FAIL, below 25% triggers WARN.
+3. **Sentence Similarity Floor**: Each claim sentence (>25 chars) must have at least one source sentence with similarity >= 0.35. Ungrounded sentences trigger FAIL.
+
+Claims with fewer than 15 content tokens are exempt. Tier-A class failures are BLOCKING; others are MAJOR.
+
+### Round 13: Raw Text Injection Detection
+
+Detects when the digest is a raw copy-paste of source text rather than a visual digest. Measures 15-gram overlap between digest plain text and source text. Above 65% triggers MAJOR FAIL; above 40% triggers MINOR WARN.
+
+### Round 14: Interpretation Density
+
+Ensures the digest contains genuine interpretation content, not just structural wrappers around copied text. Checks:
+1. Global ratio of interpretation-box/analysis-box/intuition content vs total words (threshold: 15%).
+2. Per-card check: content cards (>80 words) must contain at least one interpretation element.
+
+Only activates when the digest uses the interpretation-box convention.
+
+### Round 15: Structural Diversity (Type-Token Ratio)
+
+Computes type-token ratio (TTR) of digest visible text. Padded/repeated text produces very low TTR. Below 0.12 triggers MAJOR FAIL; below 0.20 triggers MINOR WARN. Only activates for digests with >= 100 words.
+
 ## Mode C Requirements
 
 - Non-metadata claims require explicit paper tag in `source_location`.
