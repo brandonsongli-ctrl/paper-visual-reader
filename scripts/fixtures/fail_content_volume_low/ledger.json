@@ -1,0 +1,29 @@
+{
+  "version": "EvidenceLedgerV1",
+  "mode": "A",
+  "source": "source.txt",
+  "claims": [
+    {
+      "claim_id": "R1",
+      "claim_class": "Result",
+      "claim_text": "The treatment coefficient is 1.25 with N = 320.",
+      "anchor": "Table 1, p.8",
+      "source_location": "Main Paper §3",
+      "severity": "BLOCKING",
+      "confidence": 0.95,
+      "status": "VERIFIED",
+      "notes": "Matches Table 1"
+    },
+    {
+      "claim_id": "E1",
+      "claim_class": "Equation",
+      "claim_text": "Equation (1): y_i = alpha + beta x_i + epsilon_i.",
+      "anchor": "Eq. (1), p.10",
+      "source_location": "Main Paper §4",
+      "severity": "BLOCKING",
+      "confidence": 0.96,
+      "status": "VERIFIED",
+      "notes": "Exact transcription"
+    }
+  ]
+}

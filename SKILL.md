@@ -396,7 +396,7 @@ Proofs MUST appear as collapsible `<details>` blocks **inline** under their prop
 - [ ] Strict gate passes before final delivery
 - [ ] Blocked report generated on blocked status
 - [ ] HTML has no em dash characters except direct source quotes with ledger anchors
-- [ ] Visible digest word count is at least 1/4 of the source paper word count
+- [ ] R16 content volume audit: PASS (visible digest word count >= 1/2 of source paper word count)
 - [ ] Digest includes interpretation without low-quality filler or self-referential boilerplate
 - [ ] Every theorem/proposition/lemma has Restatement + Intuition + Literature Context + Example + Implication
 - [ ] Every symbol defined inline on first use with glossary link

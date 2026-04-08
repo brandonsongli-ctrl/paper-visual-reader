@@ -452,6 +452,11 @@ def add_finding(
 
 def tokenize_content(text: str) -> list[str]:
     """Tokenize text into lowercase word tokens, stripping LaTeX and HTML."""
+    import unicodedata
+    # Normalize Unicode ligatures (ﬁ→fi, ﬃ→ffi, ﬀ→ff, ﬂ→fl) so that
+    # OCR-extracted source text and manually-written claim text produce
+    # identical tokens for the same word.
+    text = unicodedata.normalize("NFKD", text)
     cleaned = re.sub(r"\\[a-zA-Z]+\*?(?:\{[^}]*\})?", " ", text)  # strip LaTeX commands
     cleaned = re.sub(r"<[^>]+>", " ", cleaned)  # strip HTML tags
     cleaned = re.sub(r"\$\$?[^$]*\$\$?", " ", cleaned)  # strip math blocks
@@ -1351,6 +1356,30 @@ def main() -> int:
                 "-",
                 "R15-LOW-TTR",
                 f"Type-token ratio {ttr:.3f} is low (threshold: 0.20). Low vocabulary diversity suggests repetition or padding.",
+            )
+
+    # Round 16: Content Volume Audit
+    # Verify digest visible-text word count is at least 1/2 of source paper word count.
+    # This prevents thin, skeletal digests that omit most of the paper's content.
+    # Uses source_text (raw extracted text) and digest_plain_text (HTML stripped).
+    # Only activates for sources with >= 200 words (real papers); tiny test fixtures are exempt.
+    source_word_count_r16 = len(source_text.split()) if source_text.strip() else 0
+    digest_word_count_r16 = digest_total_word_count  # computed in R14 block
+    R16_MIN_RATIO = 0.50
+    R16_MIN_SOURCE_WORDS = 200
+    if source_word_count_r16 >= R16_MIN_SOURCE_WORDS:
+        volume_ratio = digest_word_count_r16 / source_word_count_r16
+        if volume_ratio < R16_MIN_RATIO:
+            add_finding(
+                findings,
+                "R16",
+                "content_volume",
+                "BLOCKING",
+                "FAIL",
+                "-",
+                "R16-CONTENT-VOLUME-LOW",
+                f"Digest word count ({digest_word_count_r16}) is {volume_ratio:.1%} of source ({source_word_count_r16}). "
+                f"Minimum required: {R16_MIN_RATIO:.0%}. Digest is too thin and must be regenerated with more content.",
             )
 
     # unreadable policy

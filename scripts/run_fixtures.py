@@ -225,6 +225,7 @@ def main() -> int:
         ("pass_mode_c_attributed", "C", "PASS", 0),
         ("fail_mode_c_cross_attribution", "C", "FAIL", 2),
         ("fail_mode_c_missing_paper_tag", "C", "FAIL", 2),
+        ("fail_content_volume_low", "A", "FAIL", 2),
     ]
 
     for name, mode, expected_status, expected_rc in guard_cases:

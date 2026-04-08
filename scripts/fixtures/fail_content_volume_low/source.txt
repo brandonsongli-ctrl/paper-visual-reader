@@ -1,0 +1,20 @@
+Section 1 (p.1) Introduction. This paper studies the optimal design of information structures
+in strategic environments where a sender communicates with a receiver. We develop a general
+framework for analyzing Bayesian persuasion problems with multiple receivers and heterogeneous
+prior beliefs. Our main contribution is a characterization of the sender's optimal information
+policy under general conditions on the receiver's utility function and the state space.
+
+Section 2 (p.4) Model Setup. Consider a finite state space with three states. The sender
+chooses a signal structure consisting of a set of signals and a conditional distribution over
+signals given each state. The receiver observes the signal realization and updates beliefs
+using Bayes rule. The sender's payoff depends on the receiver's action which in turn depends
+on posterior beliefs. We assume the receiver's utility is strictly concave in the action.
+
+Section 3 (p.8) reports Table 1. The treatment coefficient is 1.25 with standard error 0.32,
+sample size N = 320, and adjusted R-squared = 0.41. These results are statistically significant
+at the one percent level.
+
+Equation (1) in Section 4 (p.10): y_i = alpha + beta x_i + epsilon_i.
+
+Section 5 (p.14) discusses robustness checks confirming the baseline estimates. The pattern
+is associated with higher outcomes across all subsamples examined.

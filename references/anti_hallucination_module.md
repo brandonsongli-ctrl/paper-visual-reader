@@ -111,6 +111,16 @@ Only activates when the digest uses the interpretation-box convention.
 
 Computes type-token ratio (TTR) of digest visible text. Padded/repeated text produces very low TTR. Below 0.12 triggers MAJOR FAIL; below 0.20 triggers MINOR WARN. Only activates for digests with >= 100 words.
 
+### Round 16: Content Volume Audit
+
+Verifies that the digest visible-text word count (excluding HTML tags, scripts, styles) is at least 50% of the source paper word count. This is a dynamic hard floor scaled to the specific paper being processed. Thin, skeletal digests that omit most of the paper's content trigger BLOCKING FAIL and must be regenerated.
+
+- Source word count: `len(source_text.split())`
+- Digest word count: visible text after stripping `<script>`, `<style>`, and all HTML tags
+- Activation threshold: source must have >= 200 words (tiny test fixtures are exempt)
+- Threshold: digest words / source words >= 0.50
+- Below 0.50: BLOCKING FAIL
+
 ## Mode C Requirements
 
 - Non-metadata claims require explicit paper tag in `source_location`.
