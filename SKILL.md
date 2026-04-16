@@ -50,7 +50,7 @@ Output directory: `paper_digest_<FirstAuthor>_<Year>_<ShortTitle>/`
 
 ## Output Constraints (User-Defined)
 
-- In HTML output, do not use the em dash character (`---`). It is only allowed when directly quoting source text that contains an em dash; keep it inside a quote and tie it to a source location in the evidence ledger. Use commas, colons, or secondary sentences for transitions.
+- In HTML output, do not use the em dash character (`---`) or the en dash character (`--`, HTML entity `&ndash;`, Unicode `–`). Neither is allowed except when directly quoting source text that contains the character; keep it inside a quote and tie it to a source location in the evidence ledger. Use commas, colons, or secondary sentences for transitions.
 - The visual digest word count (visible text only, excluding HTML tags, scripts, and styles) must be at least 1/2 of the source paper word count. This is a dynamic hard floor scaled to the specific paper being processed to ensure pedagogical depth. Failure to meet this relative floor renders the output invalid.
 - Do not pad with low-quality filler. Add interpretation that explains implications, connections, or reasoning beyond surface paraphrase, while staying grounded in the source. Use the `interpretation-box` or `analysis-box` components.
 - Style Preference: **Always** use the "Premium Academic" template (`references/templates/premium_academic.html`) as the default and mandatory choice. This features a white/neutral minimalist aesthetic, `Crimson Pro` serif body text, and sidebar navigation. Do not use other templates unless explicitly requested.
@@ -155,6 +155,154 @@ See: `references/evidence_ledger_schema.md`
 - `FAIL`: always blocked
 
 Strict mode blocks both `WARN` and `FAIL`.
+
+## Common Failure Patterns (Guard Rework Prevention)
+
+This section documents every failure mode that has caused guard rework, so that the first draft passes without iteration.
+
+### R0: Evidence Ledger Enum Values
+
+**Valid `claim_class` values** (case-sensitive):
+`Result`, `Mechanism`, `Citation`, `Equation`, `Numeric`, `Causal`
+
+**Valid `severity` values** (case-sensitive):
+`BLOCKING`, `MAJOR`, `MINOR`
+
+**Valid `status` values** (case-sensitive):
+`VERIFIED`, `UNVERIFIED`, `DISPUTED`
+
+Using any other string (e.g. `"result"`, `"minor"`, `"verified"`) triggers R0 BLOCKING.
+
+### R2: Anchor Syntax for Tier-A Claims
+
+All Tier-A claims (Result, Citation, Equation, Numeric, Causal) require `anchor` to match the pattern `§`, `p. N`, `pp. N-M`, `appendix`, `section`, or similar page/section reference. A bare claim-id like `"anchor": "THM1"` triggers R2 MAJOR.
+
+**Correct:** `"anchor": "Section III.A, p. 1220"`
+**Wrong:** `"anchor": "THM1"`
+
+### R6: Citation Class Requires Author (Year) Token
+
+Any claim with `claim_class: "Citation"` must contain an `Author (Year)` pattern in `claim_text`. If a citation has no author-year token, change its class to `"Mechanism"` or `"Result"` instead.
+
+**Correct:** `"Kamenica and Gentzkow (2011) established..."` in claim_text
+**Wrong:** Citation class with no author-year, e.g. `"FINRA rule 2241..."`
+
+### R7: No Duplicate `data-claim-id` in HTML
+
+Each claim_id must appear on exactly ONE element with `data-claim-id` in the HTML. Content cards and ledger cards must NOT share the same attribute. Use `data-ledger-id` on ledger panel cards and `data-claim-id` on content cards only.
+
+**Wrong pattern:**
+```html
+<div class="content-card" data-claim-id="THM1">...</div>
+...
+<div class="ledger-card" data-claim-id="THM1">...</div>  <!-- duplicate! -->
+```
+**Correct pattern:**
+```html
+<div class="content-card" data-claim-id="THM1">...</div>
+...
+<div class="ledger-card" data-ledger-id="THM1">...</div>
+```
+
+### R9: No Standalone Pronoun "i" in HTML or Claim Text
+
+The guard flags `\b(i|my|me)\b` in the full lowercased text of each claim card (claim_text + HTML card text). Common accidental triggers:
+
+- **`i.e.`** — replace with `that is` everywhere
+- **`(a, i)`** as an index variable — replace with `(a, n)` or `(a, k)` 
+- **`Section I`** — replace with `Section 1` or `Introduction`
+- **`i + k`** as formula — replace with `n + k`
+- **`A type-$v_i$ agent`** — replace with `A type-$v_n$ agent`
+
+Scan ALL interpretation boxes, proof blocks, and footnotes before submitting.
+
+### R11: No JavaScript Template Literals `${...}` in Embedded Scripts
+
+Any `${...}` inside `<script>` tags triggers R11 BLOCKING. Use string concatenation or pre-computed variables instead.
+
+**Wrong:** `` `Value: ${x.toFixed(2)}` ``
+**Correct:** `"Value: " + x.toFixed(2)`
+
+### R12: N-gram Grounding — Claim Text Must Overlap Source
+
+The guard computes 4-gram overlap between `claim_text` content tokens and source document content tokens. **≥25% = PASS, 12-25% = WARN (blocked in strict mode), <12% = FAIL.**
+
+**Critical OCR artifact:** The source extractor (`pdftotext`) often produces math like `p^ < 1=2` with literal `<` and `>` characters. The guard's `content_tokens()` function applies `re.sub(r"<[^>]+>", " ", text)` BEFORE stripping non-alphanumerics — this treats any `<...>` in the OCR text as an HTML tag and deletes everything between them. This silently removes source phrases, causing many source 4-grams to be absent from `source_ngrams`.
+
+**Consequence:** Paraphrased claim_texts that use math-heavy source phrases often score 0% because those source phrases were deleted by the OCR artifact.
+
+**Remedy — Three rules:**
+1. **Keep claim_text short** — fewer total claim 4-grams means each source match has higher weight. Aim for ≤12 non-stopword content tokens (yields ≤9 unique 4-grams).
+2. **Use verbatim source phrases** — copy consecutive non-math runs of text from the source directly into claim_text. Plain-English passages and section headers survive the strip intact.
+3. **Pre-verify before committing** — run the diagnostic script below to confirm overlap before writing the ledger:
+
+```python
+import re, json
+STOPWORDS = {"a","an","the","and","or","but","in","on","at","to","for","of","with","by","from","is","are","was","were","be","been","being","have","has","had","do","does","did","will","would","shall","should","may","might","can","could","must","that","which","who","whom","this","these","those","it","its","as","if","then","than","so","not","no","nor","each","every","all","any","both","such","into","over","under","also","about","up","out","just","only","very","more","most","other","some","when","where","how","what","there","here","between","through","during","before","after","above","below","because","while","since","until","although","however","therefore","thus","hence","given","let","we","our","us","i","my","me","they","their","them","he","she","his","her","one","two","first"}
+
+def content_tokens(text):
+    t = re.sub(r"\\[a-zA-Z]+\*?(?:\{[^}]*\})?", " ", text)
+    t = re.sub(r"<[^>]+>", " ", t)
+    t = re.sub(r"\$\$?[^$]*\$\$?", " ", t)
+    t = re.sub(r"[^a-zA-Z0-9\s]", " ", t)
+    return [w.lower() for w in t.split() if len(w)>=2 and w.lower() not in STOPWORDS]
+
+def ngrams(toks, n=4): return set(zip(*[toks[i:] for i in range(n)]))
+
+source = open("extracted.txt", errors="replace").read()
+sn = ngrams(content_tokens(source))
+
+claim_text = "YOUR CLAIM TEXT HERE"
+cn = ngrams(content_tokens(claim_text))
+score = len(cn & sn) / len(cn) if cn else 0
+print(f"{score:.1%}  matches: {sorted(cn & sn)[:5]}")
+```
+
+To find useful source 4-grams for a claim, scan `source_ngrams` for any 4-gram containing a key word:
+```python
+for g in sorted(sn):
+    if "retention" in g:  # replace with your keyword
+        print(g)
+```
+
+### R14: Interpretation Density ≥15%
+
+At least 15% of HTML content cards must contain an interpretation or analysis box. The guard counts cards with class `interpretation-box` or `analysis-box`. **Use `<strong>` or `<span>` for labels inside these boxes** — do NOT nest a `<div>` as the first child, as that triggers incorrect density counting.
+
+**Correct:**
+```html
+<div class="interpretation-box" data-claim-id="THM1">
+  <strong>Author's Interpretation:</strong> This result means...
+</div>
+```
+
+**Wrong:**
+```html
+<div class="interpretation-box" data-claim-id="THM1">
+  <div class="label">Author's Interpretation:</div>  <!-- nested div breaks count -->
+  This result means...
+</div>
+```
+
+### R16: Word Count Floor
+
+The visible word count of the HTML (text only, excluding tags, scripts, styles) must be **≥ 50% of the source document word count**. For a 15,830-word source paper, the minimum HTML word count is **7,915 words**.
+
+Calculation: `source_word_count = len(source_text.split())`, then `floor = int(source_word_count * 0.5)`.
+
+If the guard reports a word count violation, add more interpretation paragraphs to under-covered sections — do not pad with repeated boilerplate.
+
+### Template Family Flag
+
+The `--template-family` argument accepts exactly: `theory`, `review`, `premium_academic`.
+
+**Do NOT use** `premium-academic` (hyphen instead of underscore) — it will not match and required sections will not be checked.
+
+Theory template required section IDs: `#architecture`, `#setup`, `#lemmas`, `#theorems`, `#examples`, `#ledger`
+
+Review template required section IDs: `#scope`, `#framework`, `#strands`, `#crosscut`, `#frontier`, `#conclusion`, `#ledger`
+
+Every required section ID must appear as an HTML element `id` attribute in the digest.
 
 ### Round 12: Interpretation Grounding
 
@@ -364,6 +512,127 @@ Proofs MUST appear as collapsible `<details>` blocks **inline** under their prop
 - The "Extreme Granularity" rules in `references/paper_structure_guide.md` require proofs inline under their proposition as collapsible `<details>` blocks, NOT in a separate appendix.
 - The theory template section structure (`#setup`, `#lemmas`, `#theorems`, `#examples`, `#ledger`) remains, but proofs live inside each result card rather than a separate proofs section.
 
+## Right Context Panel (v5)
+
+Every digest using the premium_academic template MUST include a `<aside id="right-panel">` element after `</main>`. Without it, `main`'s `max-width` creates a dead whitespace strip on the right side of the page on wide screens.
+
+### Why It Is Required
+
+The `body` uses `display:flex`. The sidebar is fixed-width (260px) and `main` has `flex:1` with `max-width:860px`. On screens wider than 1120px, the flex container has leftover space that stays blank white. The right panel fills this space as a third flex column.
+
+### Layout Structure
+
+```
+<body display:flex>
+  <nav id="sidebar" width:260px fixed>       <!-- TOC, paper meta -->
+  <main flex:1 padding:0>
+    <div class="main-inner" max-width:860px margin:auto>
+      <!-- ALL content: header, sections, ledger -->
+    </div>
+  </main>
+  <aside id="right-panel" width:220px fixed>  <!-- Context panel -->
+</body>
+```
+
+**Critical**: `main` must have NO `max-width` — only the inner `.main-inner` wrapper constrains content width. This allows `main` to fill the full flex space while keeping text at a readable width.
+
+### Required CSS
+
+```css
+main { flex: 1; padding: 0; min-width: 0; }
+.main-inner { max-width: 860px; margin: 0 auto; padding: 2.5rem 2.5rem 4rem; }
+#right-panel { width: 220px; min-width: 220px; height: 100vh; position: sticky; top: 0; overflow-y: auto; border-left: 1px solid var(--sidebar-border); background: var(--sidebar-bg); padding: 1.5rem 1rem 2rem; flex-shrink: 0; }
+.rp-section { margin-bottom: 1.4rem; }
+.rp-label { font-family: 'Inter', sans-serif; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: .45rem; padding-bottom: .35rem; border-bottom: 1px solid var(--sidebar-border); }
+.rp-stats { list-style: none; padding: 0; }
+.rp-stats li { font-family: 'Inter', sans-serif; font-size: .78rem; color: var(--text-secondary); padding: .26rem 0; display: flex; justify-content: space-between; align-items: baseline; }
+.rp-stats .stat-value { font-weight: 600; color: var(--text-primary); text-align: right; max-width: 110px; }
+.rp-current { font-family: 'Inter', sans-serif; font-size: .78rem; font-weight: 600; color: var(--accent-blue); padding: .45rem .65rem; background: var(--accent-blue-bg); border-radius: 5px; border-left: 3px solid var(--accent-blue); line-height: 1.4; }
+.rp-contributions { list-style: none; padding: 0; }
+.rp-contributions li { font-family: 'Inter', sans-serif; font-size: .75rem; color: var(--text-body); padding: .32rem 0 .32rem 14px; position: relative; border-bottom: 1px dotted var(--card-border); line-height: 1.45; }
+.rp-contributions li:last-child { border-bottom: none; }
+.rp-contributions li::before { content: ''; position: absolute; left: 0; top: 10px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-blue); }
+@media (max-width: 1100px) { #right-panel { display: none; } }
+@media (max-width: 900px) { #sidebar { display: none; } .main-inner { padding: 1.5rem; } }
+```
+
+### Required HTML Structure
+
+```html
+<aside id="right-panel">
+  <!-- 1. Dynamic section indicator (updated by IntersectionObserver) -->
+  <div class="rp-section">
+    <div class="rp-label">Reading</div>
+    <div class="rp-current" id="rp-current-section">Introduction</div>
+  </div>
+
+  <!-- 2. At-a-Glance stats (paper metadata) -->
+  <div class="rp-section">
+    <div class="rp-label">At a Glance</div>
+    <ul class="rp-stats">
+      <li>Type <span class="stat-value">{{PAPER_TYPE}}</span></li>
+      <li>Year <span class="stat-value">{{YEAR}}</span></li>
+      <li>Journal <span class="stat-value">{{JOURNAL_SHORT}}</span></li>
+      <li>JEL <span class="stat-value">{{JEL_CODES}}</span></li>
+    </ul>
+  </div>
+
+  <!-- 3. Structural count (theorems/propositions/lemmas) -->
+  <div class="rp-section">
+    <div class="rp-label">Structure</div>
+    <ul class="rp-stats">
+      <li>Theorems <span class="stat-value">{{N_THEOREMS}}</span></li>
+      <li>Propositions <span class="stat-value">{{N_PROPOSITIONS}}</span></li>
+      <li>Lemmas <span class="stat-value">{{N_LEMMAS}}</span></li>
+      <li>Sections <span class="stat-value">{{N_SECTIONS}}</span></li>
+    </ul>
+  </div>
+
+  <!-- 4. Key contributions (1 line each, ≤4 items) -->
+  <div class="rp-section">
+    <div class="rp-label">Contributions</div>
+    <ul class="rp-contributions">
+      <li>{{CONTRIBUTION_1}}</li>
+      <li>{{CONTRIBUTION_2}}</li>
+      <!-- ... -->
+    </ul>
+  </div>
+
+  <!-- 5. Key notation quick-ref (symbol + one-word gloss) -->
+  <div class="rp-section">
+    <div class="rp-label">Key Notation</div>
+    <ul class="rp-stats">
+      <li>${{SYM_1}}$ <span class="stat-value">{{GLOSS_1}}</span></li>
+      <!-- ... -->
+    </ul>
+  </div>
+</aside>
+```
+
+### Dynamic Section Indicator JS
+
+Add inside the existing IntersectionObserver callback (alongside the sidebar active-link logic):
+
+```javascript
+const SECTION_LABELS = {
+  'abstract': 'Abstract', 'setup': 'Model Setup',
+  'sec3': 'Section 3', /* fill from actual section IDs */
+  'conclusion': 'Conclusion', 'ledger': 'Evidence Ledger'
+};
+const rpEl = document.getElementById('rp-current-section');
+// Inside the observer callback:
+if (e.isIntersecting && rpEl && SECTION_LABELS[id]) { rpEl.textContent = SECTION_LABELS[id]; }
+```
+
+### Checklist Items
+
+- [ ] `<main>` has NO `max-width` (only `.main-inner` does)
+- [ ] `<div class="main-inner">` wraps all content inside `<main>`
+- [ ] `<aside id="right-panel">` present after `</main>`
+- [ ] Right panel contains: Reading indicator, At-a-Glance, Structure, Contributions, Key Notation
+- [ ] `@media (max-width: 1100px) { #right-panel { display: none; } }` present
+- [ ] IntersectionObserver updates `#rp-current-section` on scroll
+
 ## Scripts
 
 - `scripts/source_extractor.py`: extraction and OCR fallback
@@ -395,8 +664,10 @@ Proofs MUST appear as collapsible `<details>` blocks **inline** under their prop
 - [ ] Guard report and JSON report are generated
 - [ ] Strict gate passes before final delivery
 - [ ] Blocked report generated on blocked status
-- [ ] HTML has no em dash characters except direct source quotes with ledger anchors
+- [ ] HTML has no em dash (`---`) or en dash (`--`, `&ndash;`, `–`) except inside direct source quotes with ledger anchors
 - [ ] R16 content volume audit: PASS (visible digest word count >= 1/2 of source paper word count)
+- [ ] R17 interactive viz audit: PASS (theory/premium: >= 2 interactive-viz elements; review: >= 1)
+- [ ] R18 static image audit: at least one `<img>` or `<svg>` element in the digest (soft requirement)
 - [ ] Digest includes interpretation without low-quality filler or self-referential boilerplate
 - [ ] Every theorem/proposition/lemma has Restatement + Intuition + Literature Context + Example + Implication
 - [ ] Every symbol defined inline on first use with glossary link
@@ -420,6 +691,11 @@ Proofs MUST appear as collapsible `<details>` blocks **inline** under their prop
 - [ ] R13 raw-text-injection check: PASS (<=40% 15-gram overlap with source)
 - [ ] R14 interpretation-density check: PASS (interpretation boxes >=15% of digest words)
 - [ ] R15 vocabulary-diversity check: PASS (TTR >=0.20)
+- [ ] Right Context Panel: `<aside id="right-panel">` present after `</main>` (v5)
+- [ ] Right panel contains: Reading indicator, At-a-Glance stats, Structure counts, Contributions, Key Notation (v5)
+- [ ] `<main>` has NO `max-width`; content width constrained only by inner `.main-inner` wrapper (v5)
+- [ ] `@media (max-width: 1100px) { #right-panel { display: none; } }` present in CSS (v5)
+- [ ] IntersectionObserver updates `#rp-current-section` text on scroll (v5)
 
 <!-- ANTI_HALLUCINATION_SKILL_PROFILE_V2:paper-visual-reader:7258e1ec1a2f -->
 ## Anti-Hallucination Module: paper-visual-reader

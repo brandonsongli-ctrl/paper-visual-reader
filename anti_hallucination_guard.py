@@ -1382,6 +1382,56 @@ def main() -> int:
                 f"Minimum required: {R16_MIN_RATIO:.0%}. Digest is too thin and must be regenerated with more content.",
             )
 
+    # Round 17: Interactive Visualization Count
+    # Theory and premium digests must include a minimum number of interactive Canvas/SVG
+    # visualizations to provide hands-on intuition beyond static prose.
+    # Counts elements with class="interactive-viz" in the HTML.
+    # Minimum thresholds by template family:
+    #   theory: 2  (at least two core results need visual illustration)
+    #   review: 1  (at least one framework or strand diagram)
+    #   premium_academic: 2
+    #   empirical/comparative: 1
+    # Severity: WARN (blocks in strict mode) -- addable without full regeneration.
+    import re as _re17
+    r17_viz_count = len(_re17.findall(r'class=["\']interactive-viz["\']', digest_html))
+    R17_MIN_VIZ = {"theory": 2, "review": 1, "premium_academic": 2, "empirical": 1, "comparative": 1}
+    r17_threshold = R17_MIN_VIZ.get(template_family, 1)
+    if r17_viz_count < r17_threshold:
+        add_finding(
+            findings,
+            "R17",
+            "interactive_viz_count",
+            "MINOR",
+            "WARN",
+            "-",
+            "R17-INTERACTIVE-VIZ-LOW",
+            f"Digest contains {r17_viz_count} interactive-viz element(s); minimum recommended for '{template_family}' is {r17_threshold}. "
+            f"Add Canvas/SVG visualizations after key result cards to improve reader comprehension.",
+        )
+
+    # Round 18: Static Image / Visualization Presence
+    # Digest SHOULD include at least one visual element: either a static <img>, an inline
+    # <svg>, OR a sufficient number of interactive Canvas vizzes (R17 passing).
+    # Interactive Canvas visualizations are a superset of static images for comprehension,
+    # so R18 only fires when BOTH static images are absent AND interactive vizzes are
+    # below the R17 threshold. This avoids penalizing canvas-first digests.
+    r18_img_count = len(_re17.findall(r'<img\b', digest_html, _re17.IGNORECASE))
+    r18_svg_count = len(_re17.findall(r'<svg\b', digest_html, _re17.IGNORECASE))
+    r18_has_visuals = (r18_img_count + r18_svg_count > 0) or (r17_viz_count >= r17_threshold)
+    if not r18_has_visuals:
+        add_finding(
+            findings,
+            "R18",
+            "visual_presence",
+            "MINOR",
+            "WARN",
+            "-",
+            "R18-NO-VISUALS",
+            f"Digest contains no static images (<img>/<svg>: {r18_img_count + r18_svg_count}) "
+            f"and insufficient interactive visualizations ({r17_viz_count} < {r17_threshold} required). "
+            "Add Canvas visualizations after key result cards or embed paper figures.",
+        )
+
     # unreadable policy
     unreadable_claims = [c for c in ledger_claims if str(c.get("status")) == "UNREADABLE"]
     if unreadable_claims and "[UNREADABLE]" not in digest_html:
